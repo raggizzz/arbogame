@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Ranking global - leitura pública, escrita autenticada
+    match /ranking/{userId} {
+      allow read: if true;
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;
+    }
+    
+    // Ranking por escola - leitura pública, escrita autenticada
+    match /schoolRanking/{schoolId}/players/{userId} {
+      allow read: if true;
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;
+    }
+    
+    // Progresso do jogador - apenas o próprio usuário
+    match /progress/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Estatísticas globais - leitura pública
+    match /stats/global {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}
