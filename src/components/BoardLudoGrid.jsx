@@ -1,96 +1,101 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Star, Trophy, HelpCircle, Bug, Target } from 'lucide-react';
+import { Star, Bug } from 'lucide-react';
 import useGameStore from '../store/gameStore';
 
 const BoardLudoGrid = () => {
-  const { board, players, currentPlayerIndex, diceValue } = useGameStore();
-  
+  const { board, players } = useGameStore();
+
   if (!board || !players) return null;
 
-  // Cores EXATAS do Ludo físico
   const colors = {
-    0: { main: '#E63946', light: '#FEE2E2', dark: '#991B1B' }, // VERMELHO
-    1: { main: '#2A9D8F', light: '#D1FAE5', dark: '#166534' }, // VERDE
-    2: { main: '#264653', light: '#DBEAFE', dark: '#1E40AF' }, // AZUL
-    3: { main: '#E9C46A', light: '#FEF3C7', dark: '#A16207' }  // AMARELO
+    red: '#DC2626',
+    green: '#059669',
+    yellow: '#EAB308',
+    blue: '#2563EB'
   };
 
-  // MAPA DE COORDENADAS - 52 CASAS EXTERNAS (CRUZ CONTÍNUA)
-  const pathCoordinates = [
-    // VERMELHO - Saída (casa 0) - Linha 9, começando da esquerda
-    { col: 1, row: 9, color: 0, isStart: true },
-    { col: 2, row: 9 }, { col: 3, row: 9 }, { col: 4, row: 9 }, { col: 5, row: 9 }, { col: 6, row: 9 },
-    
-    // Coluna esquerda subindo (6-11)
-    { col: 7, row: 9 }, { col: 7, row: 8, isSafe: true }, { col: 7, row: 7 }, { col: 7, row: 6 }, { col: 7, row: 5 }, { col: 7, row: 4 },
-    
-    // VERDE - Saída (casa 12) - Coluna 7, subindo
-    { col: 7, row: 3, color: 1, isStart: true },
-    { col: 7, row: 2 }, { col: 7, row: 1 },
-    
-    // Linha superior (15-17) - indo para direita
+  // Cruz completa
+  const crossCells = [];
+  for (let row = 1; row <= 15; row++) {
+    for (let col = 1; col <= 15; col++) {
+      if ((row >= 7 && row <= 9) || (col >= 7 && col <= 9)) {
+        crossCells.push({ col, row });
+      }
+    }
+  }
+
+  // Caminho principal (52 casas) - CORRIGIDO
+  const pathPositions = [
+    // VERMELHO (inferior esquerdo)
+    { col: 2, row: 9, color: 'red', isStart: true }, // 0
+    { col: 3, row: 9 }, { col: 4, row: 9 }, { col: 5, row: 9 }, { col: 6, row: 9 },
+
+    // Sobe coluna 7
+    { col: 7, row: 9 }, { col: 7, row: 8, isSafe: true }, { col: 7, row: 7 },
+    { col: 7, row: 6 }, { col: 7, row: 5 }, { col: 7, row: 4 }, { col: 7, row: 3 },
+
+    // VERDE (superior esquerdo)
+    { col: 7, row: 2, color: 'green', isStart: true }, // 12
+
+    // Direita linha 1
     { col: 8, row: 1 }, { col: 9, row: 1 },
-    
-    // Coluna direita descendo (18-23)
-    { col: 9, row: 2 }, { col: 9, row: 3 }, { col: 9, row: 4, isSafe: true }, { col: 9, row: 5 }, { col: 9, row: 6 }, { col: 9, row: 7 },
-    
-    // Linha central direita (24-25)
-    { col: 9, row: 8 },
-    
-    // AZUL - Saída (casa 26) - Linha 9, vindo da direita
-    { col: 9, row: 9, color: 2, isStart: true },
-    { col: 10, row: 9 }, { col: 11, row: 9 }, { col: 12, row: 9 }, { col: 13, row: 9 }, { col: 14, row: 9 }, { col: 15, row: 9 },
-    
-    // Coluna direita descendo (33-38)
-    { col: 9, row: 10 }, { col: 9, row: 11 }, { col: 9, row: 12, isSafe: true }, { col: 9, row: 13 }, { col: 9, row: 14 }, { col: 9, row: 15 },
-    
-    // AMARELO - Saída (casa 39) - Coluna 9, descendo
-    { col: 9, row: 13, color: 3, isStart: true },
-    
-    // Linha inferior (40-44)
+
+    // Desce coluna 9
+    { col: 9, row: 2 }, { col: 9, row: 3 }, { col: 9, row: 4, isSafe: true },
+    { col: 9, row: 5 }, { col: 9, row: 6 },
+
+    // AMARELO (superior direito) - saída em row 7, col 14
+    { col: 14, row: 7, color: 'yellow', isStart: true }, // 20
+    { col: 13, row: 7 }, { col: 12, row: 7 }, { col: 11, row: 7 }, { col: 10, row: 7 }, { col: 9, row: 7 },
+
+    // Continua descendo
+    { col: 9, row: 8 }, { col: 9, row: 9 },
+
+    // Continua borda direita
+    { col: 10, row: 9 }, { col: 11, row: 9 }, { col: 12, row: 9 }, { col: 13, row: 9 },
+    { col: 14, row: 9 }, { col: 15, row: 9 },
+
+    // Desce coluna 9
+    { col: 9, row: 10 }, { col: 9, row: 11 }, { col: 9, row: 12, isSafe: true }, { col: 9, row: 13 },
+
+    // AZUL (inferior direito) - saída em row 14, col 9
+    { col: 9, row: 14, color: 'blue', isStart: true }, // 39
+    { col: 9, row: 15 },
+
+    // Esquerda linha 15
     { col: 8, row: 15 }, { col: 7, row: 15 },
-    
-    // Coluna esquerda subindo (45-50)
-    { col: 7, row: 14 }, { col: 7, row: 13 }, { col: 7, row: 12, isSafe: true }, { col: 7, row: 11 }, { col: 7, row: 10 },
-    
-    // Fechamento (51)
-    { col: 7, row: 10 }
+
+    // Sobe coluna 7
+    { col: 7, row: 14 }, { col: 7, row: 13 }, { col: 7, row: 12, isSafe: true },
+    { col: 7, row: 11 }, { col: 7, row: 10 },
+
+    // Fecha círculo linha 9
+    { col: 6, row: 9 }, { col: 5, row: 9 }, { col: 4, row: 9 },
+    { col: 3, row: 9 }, { col: 2, row: 9 }, { col: 1, row: 9 }
   ];
 
-  // CASAS BRANCAS ANTES DO CENTRO - 6 casas por braço (parte do caminho comum)
-  const whiteCenterPaths = {
-    0: [ // VERMELHO - 6 casas brancas horizontais (esquerda → centro)
-      { col: 1, row: 8 }, { col: 2, row: 8 }, { col: 3, row: 8 }, { col: 4, row: 8 }, { col: 5, row: 8 }, { col: 6, row: 8 }
-    ],
-    1: [ // VERDE - 6 casas brancas verticais (cima → centro)
-      { col: 8, row: 1 }, { col: 8, row: 2 }, { col: 8, row: 3 }, { col: 8, row: 4 }, { col: 8, row: 5 }, { col: 8, row: 6 }
-    ],
-    2: [ // AZUL - 6 casas brancas horizontais (direita → centro)
-      { col: 15, row: 8 }, { col: 14, row: 8 }, { col: 13, row: 8 }, { col: 12, row: 8 }, { col: 11, row: 8 }, { col: 10, row: 8 }
-    ],
-    3: [ // AMARELO - 6 casas brancas verticais (baixo → centro)
-      { col: 8, row: 15 }, { col: 8, row: 14 }, { col: 8, row: 13 }, { col: 8, row: 12 }, { col: 8, row: 11 }, { col: 8, row: 10 }
-    ]
+  // Caminhos finais SEM o centro (8,8)
+  const homePositions = {
+    red: [{ col: 2, row: 8 }, { col: 3, row: 8 }, { col: 4, row: 8 }, { col: 5, row: 8 }, { col: 6, row: 8 }, { col: 7, row: 8 }],
+    green: [{ col: 8, row: 2 }, { col: 8, row: 3 }, { col: 8, row: 4 }, { col: 8, row: 5 }, { col: 8, row: 6 }, { col: 8, row: 7 }],
+    yellow: [{ col: 14, row: 8 }, { col: 13, row: 8 }, { col: 12, row: 8 }, { col: 11, row: 8 }, { col: 10, row: 8 }, { col: 9, row: 8 }],
+    blue: [{ col: 8, row: 14 }, { col: 8, row: 13 }, { col: 8, row: 12 }, { col: 8, row: 11 }, { col: 8, row: 10 }, { col: 8, row: 9 }]
   };
 
-  // CAMINHOS FINAIS - 6 casas COLORIDAS por jogador (DEPOIS das brancas)
-  const finalPaths = {
-    0: [ // VERMELHO - Horizontal (esquerda → centro)
-      { col: 2, row: 8 }, { col: 3, row: 8 }, { col: 4, row: 8 }, { col: 5, row: 8 }, { col: 6, row: 8 }, { col: 7, row: 8 }
-    ],
-    1: [ // VERDE - Vertical (cima → centro)
-      { col: 8, row: 2 }, { col: 8, row: 3 }, { col: 8, row: 4 }, { col: 8, row: 5 }, { col: 8, row: 6 }, { col: 8, row: 7 }
-    ],
-    2: [ // AZUL - Horizontal (direita → centro)
-      { col: 14, row: 8 }, { col: 13, row: 8 }, { col: 12, row: 8 }, { col: 11, row: 8 }, { col: 10, row: 8 }, { col: 9, row: 8 }
-    ],
-    3: [ // AMARELO - Vertical (baixo → centro)
-      { col: 8, row: 14 }, { col: 8, row: 13 }, { col: 8, row: 12 }, { col: 8, row: 11 }, { col: 8, row: 10 }, { col: 8, row: 9 }
-    ]
+  const getCellType = (col, row) => {
+    if (col === 8 && row === 8) return { type: 'center' };
+
+    const pathIdx = pathPositions.findIndex(p => p.col === col && p.row === row);
+    if (pathIdx >= 0) return { type: 'path', ...pathPositions[pathIdx], pathIdx };
+
+    for (const [color, positions] of Object.entries(homePositions)) {
+      const homeIdx = positions.findIndex(p => p.col === col && p.row === row);
+      if (homeIdx >= 0) return { type: 'home', color, homeIdx };
+    }
+
+    return { type: 'empty' };
   };
 
-  // Obter peões em uma posição
-  const getPawnsAtPosition = (location, position) => {
+  const getPawnsAt = (location, position) => {
     const pawns = [];
     players.forEach(player => {
       player.pawns?.forEach(pawn => {
@@ -102,167 +107,152 @@ const BoardLudoGrid = () => {
     return pawns;
   };
 
-  // Renderizar peão (SEM ANIMAÇÕES CURVAS)
-  const Pawn = ({ playerIndex, size = 20, index = 0 }) => {
-    const color = colors[playerIndex];
-    const offset = index * 4;
-    
+  const Pawn = ({ playerIdx, size = 12 }) => {
+    const colorMap = [colors.red, colors.green, colors.yellow, colors.blue];
     return (
-      <div
-        className="absolute rounded-full border-2 border-white"
-        style={{ 
-          width: size,
-          height: size,
-          left: `calc(50% - ${size/2}px + ${offset}px)`,
-          top: `calc(50% - ${size/2}px + ${offset}px)`,
-          background: `radial-gradient(circle at 35% 35%, ${color.light}, ${color.main})`,
-          boxShadow: `0 2px 8px rgba(0,0,0,0.3)`,
-          zIndex: 30 + index
-        }}
-      />
+      <div className="absolute rounded-full border-2 border-white shadow-lg" style={{
+        width: size, height: size,
+        backgroundColor: colorMap[playerIdx],
+        left: '50%', top: '50%',
+        transform: 'translate(-50%, -50%)',
+        zIndex: 20
+      }} />
     );
   };
 
-  // Renderizar casa QUADRADA (com alternância branco/cinza)
-  const Cell = ({ coord, index, isFinal = false }) => {
-    const pawns = getPawnsAtPosition(isFinal ? 'final' : 'main', index);
-    const hasQuiz = !isFinal && index % 5 === 0 && index > 0;
-    const hasMosquito = !isFinal && index % 7 === 0 && index > 0;
-    
-    let cellBg = 'white';
+  const Cell = ({ col, row }) => {
+    const cellInfo = getCellType(col, row);
+    let bgColor = '#FFFFFF';
     let borderColor = '#D1D5DB';
-    
-    // Casas coloridas (saída ou caminho final)
-    if (coord.color !== undefined && !isFinal) {
-      cellBg = colors[coord.color].light;
-      borderColor = colors[coord.color].main;
-    } else if (isFinal) {
-      // Caminhos finais coloridos
-      cellBg = colors[coord.color].main;
-      borderColor = colors[coord.color].dark;
-    } else {
-      // Casas brancas/cinza alternadas
-      cellBg = index % 2 === 0 ? '#FFFFFF' : '#F5F5F5';
+    let content = null;
+    let pawns = [];
+
+    if (cellInfo.type === 'center') return null;
+
+    if (cellInfo.type === 'path') {
+      pawns = getPawnsAt('main', cellInfo.pathIdx);
+
+      if (cellInfo.color) {
+        bgColor = cellInfo.color === 'red' ? '#FCA5A5' :
+          cellInfo.color === 'green' ? '#6EE7B7' :
+            cellInfo.color === 'yellow' ? '#FDE047' : '#93C5FD';
+        borderColor = colors[cellInfo.color];
+      }
+
+      if (cellInfo.isSafe) {
+        content = <Star className="w-3 h-3 text-gray-700" strokeWidth={2.5} />;
+      }
+
+      if (cellInfo.pathIdx % 8 === 0 && cellInfo.pathIdx > 0) {
+        content = <Bug className="w-3 h-3 text-red-500 absolute top-0 right-0" />;
+      }
     }
-    
+
+    if (cellInfo.type === 'home') {
+      pawns = getPawnsAt('final', cellInfo.homeIdx);
+      bgColor = colors[cellInfo.color];
+      borderColor = colors[cellInfo.color];
+    }
+
     return (
       <div
-        className="aspect-square flex items-center justify-center relative"
-        style={{ 
-          gridColumn: coord.col,
-          gridRow: coord.row,
-          backgroundColor: cellBg,
-          border: `1px solid ${borderColor}`
+        className="relative flex items-center justify-center bg-white"
+        style={{
+          gridColumn: col, gridRow: row,
+          backgroundColor: bgColor,
+          border: `1px solid ${borderColor}`,
+          minHeight: '26px', minWidth: '26px'
         }}
       >
-        {/* Ícones FIXOS (sem animação) */}
-        {coord.isStart && <Target className="w-4 h-4 absolute" style={{ color: borderColor }} />}
-        {coord.isSafe && <Shield className="w-4 h-4 text-blue-600" strokeWidth={2.5} />}
-        {hasQuiz && <HelpCircle className="w-4 h-4 text-purple-600" />}
-        {hasMosquito && <Bug className="w-4 h-4 text-red-600" />}
-        
-        {/* Peões */}
-        {pawns.map((pawn, idx) => (
-          <Pawn key={`${pawn.playerIndex}-${pawn.id}`} playerIndex={pawn.playerIndex} index={idx} />
-        ))}
+        {content}
+        {pawns.map(p => <Pawn key={`${p.playerIndex}-${p.id}`} playerIdx={p.playerIndex} />)}
       </div>
     );
   };
 
-  // Renderizar base
-  const PlayerBase = ({ playerIndex, gridArea }) => {
-    const color = colors[playerIndex];
-    const player = players[playerIndex];
+  const PlayerBase = ({ playerIdx, area }) => {
+    const colorMap = [colors.red, colors.green, colors.yellow, colors.blue];
+    const names = ['Vermelho', 'Verde', 'Amarelo', 'Azul'];
+    const color = colorMap[playerIdx];
+    const player = players[playerIdx];
     const basePawns = player?.pawns?.filter(p => p.location === 'base') || [];
-    
+
     return (
-      <div 
-        className="flex flex-col items-center justify-center p-3"
-        style={{ gridArea, backgroundColor: color.main }}
+      <div
+        className="flex flex-col items-center justify-center p-2 rounded-lg shadow-xl"
+        style={{ gridArea: area, backgroundColor: color }}
       >
-        <div className="text-white font-bold text-xs mb-2">{player?.name || `P${playerIndex + 1}`}</div>
-        <div className="bg-white rounded-lg p-2 grid grid-cols-2 gap-2" style={{ width: '100px', height: '100px' }}>
+        <div className="text-white text-xs font-bold mb-1 text-center truncate w-full px-1">
+          {player?.name || names[playerIdx]}
+        </div>
+        <div className="grid grid-cols-2 gap-1 bg-white/95 rounded-lg p-1.5 shadow-inner" style={{ width: '48px', height: '48px' }}>
           {[0, 1, 2, 3].map(i => {
             const pawn = basePawns.find(p => p.position === i);
             return (
-              <div key={i} className="rounded-full border-2 flex items-center justify-center" style={{ borderColor: color.main }}>
-                {pawn && <Pawn playerIndex={playerIndex} size={18} />}
+              <div key={i} className="rounded-full border-2 flex items-center justify-center bg-white"
+                style={{ borderColor: color }}>
+                {pawn && <Pawn playerIdx={playerIdx} size={10} />}
               </div>
             );
           })}
         </div>
-        <div className="text-white font-bold text-xs mt-1">🏆 {player?.score || 0}</div>
+        <div className="text-white text-xs font-bold mt-0.5">🏆 {player?.score || 0}</div>
       </div>
     );
   };
 
   return (
-    <div className="w-full h-full flex items-center justify-center p-4 bg-gradient-to-br from-green-900 via-blue-900 to-cyan-800">
+    <div className="w-full h-full flex items-center justify-center p-2">
       <div className="relative">
-        {/* Grid 15x15 - CRUZ CONTÍNUA LINEAR */}
-        <div 
-          className="grid bg-gray-100 shadow-2xl relative"
+        <div
+          className="grid bg-gray-200 shadow-2xl rounded-xl border-4 border-gray-900"
           style={{
-            gridTemplateColumns: 'repeat(15, 40px)',
-            gridTemplateRows: 'repeat(15, 40px)',
-            width: '600px',
-            height: '600px'
+            gridTemplateColumns: 'repeat(15, minmax(24px, 28px))',
+            gridTemplateRows: 'repeat(15, minmax(24px, 28px))',
+            maxWidth: '520px',
+            aspectRatio: '1/1',
+            gap: '1px'
           }}
         >
-          {/* BASES */}
-          <PlayerBase playerIndex={1} gridArea="1 / 1 / 7 / 7" />
-          <PlayerBase playerIndex={3} gridArea="1 / 10 / 7 / 16" />
-          <PlayerBase playerIndex={0} gridArea="10 / 1 / 16 / 7" />
-          <PlayerBase playerIndex={2} gridArea="10 / 10 / 16 / 16" />
-          
-          {/* CAMINHO EXTERNO - 52 casas */}
-          {pathCoordinates.map((coord, i) => (
-            <Cell key={`path-${i}`} coord={coord} index={i} />
+          <PlayerBase playerIdx={0} area="10/1/16/7" />
+          <PlayerBase playerIdx={1} area="1/1/7/7" />
+          <PlayerBase playerIdx={2} area="1/10/7/16" />
+          <PlayerBase playerIdx={3} area="10/10/16/16" />
+
+          {crossCells.map((cell) => (
+            <Cell key={`${cell.col}-${cell.row}`} col={cell.col} row={cell.row} />
           ))}
-          
-          {/* CASAS BRANCAS ANTES DO CENTRO - 6 por braço */}
-          {Object.entries(whiteCenterPaths).map(([playerIndex, path]) =>
-            path.map((coord, i) => (
-              <Cell key={`white-${playerIndex}-${i}`} coord={coord} index={i + 100} />
-            ))
-          )}
-          
-          {/* CAMINHOS FINAIS COLORIDOS - 6 casas por cor (DEPOIS das brancas) */}
-          {Object.entries(finalPaths).map(([playerIndex, path]) =>
-            path.map((coord, i) => (
-              <Cell key={`final-${playerIndex}-${i}`} coord={{ ...coord, color: parseInt(playerIndex) }} index={i} isFinal />
-            ))
-          )}
-          
-          {/* CENTRO - 4 triângulos coloridos PREENCHENDO TODO O QUADRADO */}
-          <div style={{ gridColumn: 8, gridRow: 8 }} className="aspect-square relative border border-gray-400">
+
+          {/* Centro - vitória final */}
+          <div className="relative bg-white border-2 border-gray-900 rounded-sm" style={{ gridColumn: 8, gridRow: 8 }}>
             <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-              {/* Verde - Triângulo Superior */}
-              <polygon points="50,0 0,50 100,50" fill={colors[1].main} stroke="#333" strokeWidth="0.5" />
-              
-              {/* Vermelho - Triângulo Esquerdo */}
-              <polygon points="0,50 50,0 50,100" fill={colors[0].main} stroke="#333" strokeWidth="0.5" />
-              
-              {/* Azul - Triângulo Direito */}
-              <polygon points="100,50 50,0 50,100" fill={colors[2].main} stroke="#333" strokeWidth="0.5" />
-              
-              {/* Amarelo - Triângulo Inferior */}
-              <polygon points="50,100 0,50 100,50" fill={colors[3].main} stroke="#333" strokeWidth="0.5" />
+              <polygon points="50,50 0,0 100,0" fill={colors.green} />
+              <polygon points="50,50 100,0 100,100" fill={colors.yellow} />
+              <polygon points="50,50 100,100 0,100" fill={colors.blue} />
+              <polygon points="50,50 0,100 0,0" fill={colors.red} />
             </svg>
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="bg-white rounded-full w-5 h-5 flex items-center justify-center shadow-lg">
-                <Star className="w-3 h-3 text-yellow-500" fill="#EAB308" strokeWidth={3} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="bg-white rounded-full p-0.5 shadow-lg">
+                <Bug className="w-3 h-3 text-red-600" fill="currentColor" />
               </div>
             </div>
           </div>
         </div>
-        
-        {/* Dado */}
-        {diceValue && (
-          <div className="absolute -top-6 -right-6 bg-white text-gray-800 font-black text-xl w-12 h-12 rounded-lg flex items-center justify-center border-2 border-gray-800 shadow-xl">
-            🎲 {diceValue}
+
+        <div className="mt-2 flex justify-center gap-2 text-xs">
+          <div className="flex items-center gap-1 bg-white px-2 py-1 rounded-full shadow-sm border">
+            <Star className="w-3 h-3 text-gray-700" />
+            <span>Segura</span>
           </div>
-        )}
+          <div className="flex items-center gap-1 bg-white px-2 py-1 rounded-full shadow-sm border">
+            <Bug className="w-3 h-3 text-red-500" />
+            <span>Mosquito</span>
+          </div>
+        </div>
+
+        <div className="mt-2 text-center text-sm font-bold text-primary-500">
+          🦟 Ludo da Dengue 💧
+        </div>
       </div>
     </div>
   );

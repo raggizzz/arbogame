@@ -2,351 +2,721 @@
   {
     "id": 1,
     "pergunta": "Qual é o principal transmissor da dengue?",
-    "alternativas": ["Culex", "Aedes aegypti", "Anopheles", "Aedes albopictus"],
+    "alternativas": [
+      "Culex",
+      "Aedes aegypti",
+      "Anopheles",
+      "Aedes albopictus"
+    ],
     "resposta": 1,
     "curiosidade": "O Aedes aegypti é o mosquito que também transmite Zika e Chikungunya!"
   },
   {
     "id": 2,
     "pergunta": "Qual o período de incubação da dengue no corpo humano?",
-    "alternativas": ["1 a 3 dias", "4 a 10 dias", "15 a 20 dias", "Mais de 30 dias"],
+    "alternativas": [
+      "1 a 3 dias",
+      "4 a 10 dias",
+      "15 a 20 dias",
+      "Mais de 30 dias"
+    ],
     "resposta": 1,
     "curiosidade": "Os sintomas aparecem entre 4 e 10 dias após a picada do mosquito infectado."
   },
   {
     "id": 3,
     "pergunta": "Qual destes NÃO é um sintoma comum da dengue?",
-    "alternativas": ["Febre alta", "Dor de cabeça", "Tosse seca persistente", "Dor muscular"],
+    "alternativas": [
+      "Febre alta",
+      "Dor de cabeça",
+      "Tosse seca persistente",
+      "Dor muscular"
+    ],
     "resposta": 2,
     "curiosidade": "Tosse não é um sintoma típico da dengue. Fique atento a febre, dores e manchas na pele!"
   },
   {
     "id": 4,
     "pergunta": "Em que tipo de água o Aedes aegypti deposita seus ovos?",
-    "alternativas": ["Água corrente", "Água parada e limpa", "Água salgada", "Água poluída"],
+    "alternativas": [
+      "Água corrente",
+      "Água parada e limpa",
+      "Água salgada",
+      "Água poluída"
+    ],
     "resposta": 1,
     "curiosidade": "O mosquito prefere água limpa e parada. Por isso, caixas d'água e vasos são criadouros perfeitos!"
   },
   {
     "id": 5,
     "pergunta": "Quantos tipos de vírus da dengue existem?",
-    "alternativas": ["2 tipos", "4 tipos", "6 tipos", "8 tipos"],
+    "alternativas": [
+      "2 tipos",
+      "4 tipos",
+      "6 tipos",
+      "8 tipos"
+    ],
     "resposta": 1,
     "curiosidade": "São 4 sorotipos: DEN-1, DEN-2, DEN-3 e DEN-4. Cada um pode causar a doença!"
   },
   {
     "id": 6,
     "pergunta": "Qual o horário preferido do Aedes aegypti para picar?",
-    "alternativas": ["Durante a noite", "Manhã e final da tarde", "Apenas ao meio-dia", "Madrugada"],
+    "alternativas": [
+      "Durante a noite",
+      "Manhã e final da tarde",
+      "Apenas ao meio-dia",
+      "Madrugada"
+    ],
     "resposta": 1,
     "curiosidade": "O mosquito é mais ativo no início da manhã e no final da tarde, mas pode picar a qualquer hora!"
   },
   {
     "id": 7,
     "pergunta": "Por quanto tempo os ovos do Aedes aegypti podem sobreviver secos?",
-    "alternativas": ["1 semana", "1 mês", "Até 1 ano", "Apenas 3 dias"],
+    "alternativas": [
+      "1 semana",
+      "1 mês",
+      "Até 1 ano",
+      "Apenas 3 dias"
+    ],
     "resposta": 2,
     "curiosidade": "Os ovos podem resistir secos por até 1 ano! Quando entram em contato com água, eclodem rapidamente."
   },
   {
     "id": 8,
     "pergunta": "Qual a melhor forma de prevenir a dengue?",
-    "alternativas": ["Tomar vacina apenas", "Eliminar água parada", "Usar repelente apenas", "Ficar em casa"],
+    "alternativas": [
+      "Tomar vacina apenas",
+      "Eliminar água parada",
+      "Usar repelente apenas",
+      "Ficar em casa"
+    ],
     "resposta": 1,
     "curiosidade": "Eliminar criadouros é a forma mais eficaz! Sem água parada, sem mosquito."
   },
   {
     "id": 9,
     "pergunta": "O que significa 'dengue hemorrágica'?",
-    "alternativas": ["Dengue leve", "Forma grave da dengue", "Dengue sem sintomas", "Dengue curada"],
+    "alternativas": [
+      "Dengue leve",
+      "Forma grave da dengue",
+      "Dengue sem sintomas",
+      "Dengue curada"
+    ],
     "resposta": 1,
     "curiosidade": "É a forma grave da doença, com sangramentos e risco de morte. Procure atendimento médico imediato!"
   },
   {
     "id": 10,
     "pergunta": "Qual destes locais é um criadouro comum do mosquito?",
-    "alternativas": ["Areia seca", "Prato de vaso de planta", "Pedras", "Grama cortada"],
+    "alternativas": [
+      "Areia seca",
+      "Prato de vaso de planta",
+      "Pedras",
+      "Grama cortada"
+    ],
     "resposta": 1,
     "curiosidade": "Pratinhos de vasos acumulam água e são criadouros perfeitos. Elimine-os ou troque a água semanalmente!"
   },
   {
     "id": 11,
     "pergunta": "A dengue pode ser transmitida de pessoa para pessoa?",
-    "alternativas": ["Sim, pelo ar", "Sim, por contato", "Não, apenas pelo mosquito", "Sim, pela água"],
+    "alternativas": [
+      "Sim, pelo ar",
+      "Sim, por contato",
+      "Não, apenas pelo mosquito",
+      "Sim, pela água"
+    ],
     "resposta": 2,
     "curiosidade": "A dengue NÃO passa de pessoa para pessoa. Só é transmitida pela picada do mosquito infectado!"
   },
   {
     "id": 12,
     "pergunta": "Qual o tamanho aproximado do Aedes aegypti?",
-    "alternativas": ["Menor que 1cm", "Entre 1 e 2cm", "Maior que 3cm", "Tamanho de uma abelha"],
+    "alternativas": [
+      "Menor que 1cm",
+      "Entre 1 e 2cm",
+      "Maior que 3cm",
+      "Tamanho de uma abelha"
+    ],
     "resposta": 0,
     "curiosidade": "O mosquito tem menos de 1cm! Apesar de pequeno, é muito perigoso."
   },
   {
     "id": 13,
     "pergunta": "Como identificar o Aedes aegypti?",
-    "alternativas": ["É todo preto", "Tem listras brancas", "É verde", "É transparente"],
+    "alternativas": [
+      "É todo preto",
+      "Tem listras brancas",
+      "É verde",
+      "É transparente"
+    ],
     "resposta": 1,
     "curiosidade": "O Aedes aegypti tem corpo escuro com listras brancas nas patas e no corpo!"
   },
   {
     "id": 14,
     "pergunta": "Existe cura específica para a dengue?",
-    "alternativas": ["Sim, antibióticos", "Sim, antivirais", "Não, apenas tratamento dos sintomas", "Sim, vacina cura"],
+    "alternativas": [
+      "Sim, antibióticos",
+      "Sim, antivirais",
+      "Não, apenas tratamento dos sintomas",
+      "Sim, vacina cura"
+    ],
     "resposta": 2,
     "curiosidade": "Não há cura específica. O tratamento é para aliviar os sintomas: hidratação e repouso!"
   },
   {
     "id": 15,
     "pergunta": "Qual medicamento NÃO deve ser usado na dengue?",
-    "alternativas": ["Paracetamol", "Dipirona", "Aspirina (AAS)", "Hidratação oral"],
+    "alternativas": [
+      "Paracetamol",
+      "Dipirona",
+      "Aspirina (AAS)",
+      "Hidratação oral"
+    ],
     "resposta": 2,
     "curiosidade": "NUNCA use AAS (aspirina) na dengue! Pode causar sangramentos graves. Use apenas paracetamol."
   },
   {
     "id": 16,
     "pergunta": "Quantos dias dura o ciclo de vida do mosquito (ovo a adulto)?",
-    "alternativas": ["2 dias", "7 a 10 dias", "20 dias", "1 mês"],
+    "alternativas": [
+      "2 dias",
+      "7 a 10 dias",
+      "20 dias",
+      "1 mês"
+    ],
     "resposta": 1,
     "curiosidade": "Em condições ideais, o ciclo completo leva de 7 a 10 dias. Por isso a limpeza deve ser semanal!"
   },
   {
     "id": 17,
     "pergunta": "A caixa d'água deve ser tampada porque:",
-    "alternativas": ["Economiza água", "Evita sujeira", "Impede criadouro do mosquito", "Todas as anteriores"],
+    "alternativas": [
+      "Economiza água",
+      "Evita sujeira",
+      "Impede criadouro do mosquito",
+      "Todas as anteriores"
+    ],
     "resposta": 3,
     "curiosidade": "Caixas d'água destampadas são criadouros perfeitos! Sempre mantenha bem fechadas."
   },
   {
     "id": 18,
     "pergunta": "Pneus velhos devem ser:",
-    "alternativas": ["Deixados no quintal", "Furados e guardados secos", "Cheios de água", "Empilhados"],
+    "alternativas": [
+      "Deixados no quintal",
+      "Furados e guardados secos",
+      "Cheios de água",
+      "Empilhados"
+    ],
     "resposta": 1,
     "curiosidade": "Pneus acumulam água da chuva. Fure-os, guarde em local coberto ou descarte corretamente!"
   },
   {
     "id": 19,
     "pergunta": "Com que frequência deve-se trocar a água dos vasos?",
-    "alternativas": ["1 vez por mês", "1 vez por semana", "Nunca", "1 vez por ano"],
+    "alternativas": [
+      "1 vez por mês",
+      "1 vez por semana",
+      "Nunca",
+      "1 vez por ano"
+    ],
     "resposta": 1,
     "curiosidade": "Troque a água dos vasos semanalmente e lave bem o pratinho para eliminar possíveis ovos!"
   },
   {
     "id": 20,
     "pergunta": "Calhas entupidas podem:",
-    "alternativas": ["Melhorar a casa", "Criar criadouros", "Não fazem diferença", "Espantar mosquitos"],
+    "alternativas": [
+      "Melhorar a casa",
+      "Criar criadouros",
+      "Não fazem diferença",
+      "Espantar mosquitos"
+    ],
     "resposta": 1,
     "curiosidade": "Calhas entupidas acumulam água parada. Limpe-as regularmente!"
   },
   {
     "id": 21,
     "pergunta": "Garrafas vazias devem ficar:",
-    "alternativas": ["De cabeça para baixo", "De cabeça para cima", "Cheias de água", "No sol"],
+    "alternativas": [
+      "De cabeça para baixo",
+      "De cabeça para cima",
+      "Cheias de água",
+      "No sol"
+    ],
     "resposta": 0,
     "curiosidade": "Garrafas viradas para baixo não acumulam água da chuva. Simples e eficaz!"
   },
   {
     "id": 22,
     "pergunta": "Qual a importância do fumacê?",
-    "alternativas": ["Mata ovos", "Mata mosquitos adultos", "Previne dengue", "Limpa a água"],
+    "alternativas": [
+      "Mata ovos",
+      "Mata mosquitos adultos",
+      "Previne dengue",
+      "Limpa a água"
+    ],
     "resposta": 1,
     "curiosidade": "O fumacê mata mosquitos adultos, mas não elimina ovos e larvas. A limpeza é essencial!"
   },
   {
     "id": 23,
     "pergunta": "Piscinas de plástico devem:",
-    "alternativas": ["Ficar sempre cheias", "Ser esvaziadas e viradas", "Ter peixinhos", "Ser cobertas"],
+    "alternativas": [
+      "Ficar sempre cheias",
+      "Ser esvaziadas e viradas",
+      "Ter peixinhos",
+      "Ser cobertas"
+    ],
     "resposta": 1,
     "curiosidade": "Esvazie e vire piscininhas quando não estiver usando. Água parada = criadouro!"
   },
   {
     "id": 24,
     "pergunta": "Ralos externos devem:",
-    "alternativas": ["Ficar abertos", "Ser tampados ou com tela", "Ter água sempre", "Ser fechados com cimento"],
+    "alternativas": [
+      "Ficar abertos",
+      "Ser tampados ou com tela",
+      "Ter água sempre",
+      "Ser fechados com cimento"
+    ],
     "resposta": 1,
     "curiosidade": "Use telas ou tampas nos ralos para impedir que mosquitos depositem ovos!"
   },
   {
     "id": 25,
     "pergunta": "Bebedouros de animais devem:",
-    "alternativas": ["Ter água parada", "Ser lavados semanalmente", "Ficar sujos", "Ter plantas"],
+    "alternativas": [
+      "Ter água parada",
+      "Ser lavados semanalmente",
+      "Ficar sujos",
+      "Ter plantas"
+    ],
     "resposta": 1,
     "curiosidade": "Lave e troque a água dos bebedouros pelo menos 1 vez por semana!"
   },
   {
     "id": 26,
     "pergunta": "Lonas e plásticos no quintal:",
-    "alternativas": ["Devem acumular água", "Devem estar bem esticados", "Não fazem diferença", "Atraem mosquitos"],
+    "alternativas": [
+      "Devem acumular água",
+      "Devem estar bem esticados",
+      "Não fazem diferença",
+      "Atraem mosquitos"
+    ],
     "resposta": 1,
     "curiosidade": "Lonas mal esticadas formam bolsões de água. Estique bem ou guarde em local seco!"
   },
   {
     "id": 27,
     "pergunta": "Bromélias podem ser criadouros?",
-    "alternativas": ["Não, nunca", "Sim, acumulam água", "Só as vermelhas", "Só as grandes"],
+    "alternativas": [
+      "Não, nunca",
+      "Sim, acumulam água",
+      "Só as vermelhas",
+      "Só as grandes"
+    ],
     "resposta": 1,
     "curiosidade": "Bromélias acumulam água entre as folhas. Regue com jato forte ou use areia nas folhas!"
   },
   {
     "id": 28,
     "pergunta": "Qual o papel da comunidade no combate à dengue?",
-    "alternativas": ["Nenhum", "Apenas do governo", "Fundamental e coletivo", "Só dos médicos"],
+    "alternativas": [
+      "Nenhum",
+      "Apenas do governo",
+      "Fundamental e coletivo",
+      "Só dos médicos"
+    ],
     "resposta": 2,
     "curiosidade": "O combate à dengue é responsabilidade de TODOS! Cada um fazendo sua parte, vencemos o mosquito!"
   },
   {
     "id": 29,
     "pergunta": "Telas em portas e janelas:",
-    "alternativas": ["Não ajudam", "Impedem entrada do mosquito", "Atraem mosquitos", "Só servem para moscas"],
+    "alternativas": [
+      "Não ajudam",
+      "Impedem entrada do mosquito",
+      "Atraem mosquitos",
+      "Só servem para moscas"
+    ],
     "resposta": 1,
     "curiosidade": "Telas são uma barreira física eficaz contra o mosquito. Mantenha-as sempre em bom estado!"
   },
   {
     "id": 30,
     "pergunta": "Repelentes devem ser usados:",
-    "alternativas": ["Só à noite", "Principalmente manhã e tarde", "Só em viagens", "Nunca"],
+    "alternativas": [
+      "Só à noite",
+      "Principalmente manhã e tarde",
+      "Só em viagens",
+      "Nunca"
+    ],
     "resposta": 1,
     "curiosidade": "Use repelente nos horários de maior atividade do mosquito: manhã e final da tarde!"
   },
   {
     "id": 31,
     "pergunta": "Roupas claras ajudam porque:",
-    "alternativas": ["São mais bonitas", "Mosquitos preferem escuro", "Não fazem diferença", "Atraem mosquitos"],
+    "alternativas": [
+      "São mais bonitas",
+      "Mosquitos preferem escuro",
+      "Não fazem diferença",
+      "Atraem mosquitos"
+    ],
     "resposta": 1,
     "curiosidade": "Mosquitos são atraídos por cores escuras. Roupas claras e compridas ajudam na proteção!"
   },
   {
     "id": 32,
     "pergunta": "Ar condicionado ajuda contra dengue?",
-    "alternativas": ["Não", "Sim, mosquito evita frio", "Só se for novo", "Atrai mosquitos"],
+    "alternativas": [
+      "Não",
+      "Sim, mosquito evita frio",
+      "Só se for novo",
+      "Atrai mosquitos"
+    ],
     "resposta": 1,
     "curiosidade": "Ambientes refrigerados reduzem a atividade do mosquito. Mas não elimine os criadouros!"
   },
   {
     "id": 33,
     "pergunta": "Ventiladores ajudam porque:",
-    "alternativas": ["Matam mosquitos", "Dificultam o voo do mosquito", "Não ajudam", "Atraem mosquitos"],
+    "alternativas": [
+      "Matam mosquitos",
+      "Dificultam o voo do mosquito",
+      "Não ajudam",
+      "Atraem mosquitos"
+    ],
     "resposta": 1,
     "curiosidade": "O vento do ventilador dificulta o voo do mosquito, que é fraco. Use como proteção extra!"
   },
   {
     "id": 34,
     "pergunta": "Plantas repelentes funcionam?",
-    "alternativas": ["Sim, 100%", "Ajudam, mas não substituem limpeza", "Não funcionam", "Atraem mosquitos"],
+    "alternativas": [
+      "Sim, 100%",
+      "Ajudam, mas não substituem limpeza",
+      "Não funcionam",
+      "Atraem mosquitos"
+    ],
     "resposta": 1,
     "curiosidade": "Citronela, lavanda e hortelã ajudam, mas a eliminação de criadouros é essencial!"
   },
   {
     "id": 35,
     "pergunta": "Inseticidas elétricos (tomada) são eficazes?",
-    "alternativas": ["Não", "Sim, matam mosquitos", "Só para moscas", "Atraem mais mosquitos"],
+    "alternativas": [
+      "Não",
+      "Sim, matam mosquitos",
+      "Só para moscas",
+      "Atraem mais mosquitos"
+    ],
     "resposta": 1,
     "curiosidade": "Inseticidas elétricos ajudam a matar mosquitos adultos em ambientes fechados!"
   },
   {
     "id": 36,
     "pergunta": "Mosquiteiros são úteis?",
-    "alternativas": ["Não", "Sim, protegem durante o sono", "Só para bebês", "Atraem mosquitos"],
+    "alternativas": [
+      "Não",
+      "Sim, protegem durante o sono",
+      "Só para bebês",
+      "Atraem mosquitos"
+    ],
     "resposta": 1,
     "curiosidade": "Mosquiteiros são excelentes para proteger durante o sono, especialmente crianças e idosos!"
   },
   {
     "id": 37,
     "pergunta": "Qual a relação entre chuva e dengue?",
-    "alternativas": ["Nenhuma", "Chuva cria mais criadouros", "Chuva mata mosquitos", "Chuva espanta dengue"],
+    "alternativas": [
+      "Nenhuma",
+      "Chuva cria mais criadouros",
+      "Chuva mata mosquitos",
+      "Chuva espanta dengue"
+    ],
     "resposta": 1,
     "curiosidade": "Após chuvas, aumentam os criadouros. Reforce a limpeza e elimine água acumulada!"
   },
   {
     "id": 38,
     "pergunta": "Terrenos baldios devem:",
-    "alternativas": ["Ficar sujos", "Ser limpos e fiscalizados", "Ter lixo", "Acumular água"],
+    "alternativas": [
+      "Ficar sujos",
+      "Ser limpos e fiscalizados",
+      "Ter lixo",
+      "Acumular água"
+    ],
     "resposta": 1,
     "curiosidade": "Terrenos baldios são grandes criadouros. Denuncie terrenos abandonados à prefeitura!"
   },
   {
     "id": 39,
     "pergunta": "Lixo acumulado pode:",
-    "alternativas": ["Prevenir dengue", "Criar criadouros", "Espantar mosquitos", "Não faz diferença"],
+    "alternativas": [
+      "Prevenir dengue",
+      "Criar criadouros",
+      "Espantar mosquitos",
+      "Não faz diferença"
+    ],
     "resposta": 1,
     "curiosidade": "Lixo acumula água da chuva. Mantenha lixeiras tampadas e descarte corretamente!"
   },
   {
     "id": 40,
     "pergunta": "Agentes de saúde devem:",
-    "alternativas": ["Ser ignorados", "Ser recebidos e auxiliados", "Ser evitados", "Trabalhar sozinhos"],
+    "alternativas": [
+      "Ser ignorados",
+      "Ser recebidos e auxiliados",
+      "Ser evitados",
+      "Trabalhar sozinhos"
+    ],
     "resposta": 1,
     "curiosidade": "Agentes de saúde são aliados! Receba-os bem e siga as orientações para eliminar criadouros."
   },
   {
     "id": 41,
     "pergunta": "Sintomas graves da dengue incluem:",
-    "alternativas": ["Dor leve", "Vômitos persistentes e sangramento", "Tosse", "Espirro"],
+    "alternativas": [
+      "Dor leve",
+      "Vômitos persistentes e sangramento",
+      "Tosse",
+      "Espirro"
+    ],
     "resposta": 1,
     "curiosidade": "Vômitos persistentes, dor abdominal intensa e sangramentos são sinais de alerta. Procure ajuda!"
   },
   {
     "id": 42,
     "pergunta": "Hidratação na dengue é importante porque:",
-    "alternativas": ["Não é importante", "Previne desidratação e complicações", "Cura a doença", "Mata o vírus"],
+    "alternativas": [
+      "Não é importante",
+      "Previne desidratação e complicações",
+      "Cura a doença",
+      "Mata o vírus"
+    ],
     "resposta": 1,
     "curiosidade": "Beba MUITO líquido! Água, soro caseiro e água de coco ajudam a prevenir complicações."
   },
   {
     "id": 43,
     "pergunta": "Crianças e idosos com dengue:",
-    "alternativas": ["Não precisam de cuidados", "Precisam de atenção especial", "Não pegam dengue", "Curam sozinhos"],
+    "alternativas": [
+      "Não precisam de cuidados",
+      "Precisam de atenção especial",
+      "Não pegam dengue",
+      "Curam sozinhos"
+    ],
     "resposta": 1,
     "curiosidade": "Crianças e idosos têm maior risco de complicações. Fique atento aos sintomas!"
   },
   {
     "id": 44,
     "pergunta": "Pode-se pegar dengue mais de uma vez?",
-    "alternativas": ["Não", "Sim, até 4 vezes", "Só 2 vezes", "Só se viajar"],
+    "alternativas": [
+      "Não",
+      "Sim, até 4 vezes",
+      "Só 2 vezes",
+      "Só se viajar"
+    ],
     "resposta": 1,
     "curiosidade": "Sim! Existem 4 tipos de vírus. Cada infecção aumenta o risco de dengue grave."
   },
   {
     "id": 45,
     "pergunta": "Exames de sangue na dengue servem para:",
-    "alternativas": ["Curar", "Monitorar plaquetas", "Não servem", "Vacinar"],
+    "alternativas": [
+      "Curar",
+      "Monitorar plaquetas",
+      "Não servem",
+      "Vacinar"
+    ],
     "resposta": 1,
     "curiosidade": "Exames monitoram as plaquetas (células da coagulação). Queda acentuada indica gravidade!"
   },
   {
     "id": 46,
     "pergunta": "Manchas vermelhas na pele podem indicar:",
-    "alternativas": ["Cura", "Dengue", "Alergia ao mosquito", "Nada"],
+    "alternativas": [
+      "Cura",
+      "Dengue",
+      "Alergia ao mosquito",
+      "Nada"
+    ],
     "resposta": 1,
     "curiosidade": "Manchas vermelhas (exantema) são comuns na dengue. Fique atento a outros sintomas!"
   },
   {
     "id": 47,
     "pergunta": "Dengue e COVID-19:",
-    "alternativas": ["São a mesma doença", "Podem ter sintomas parecidos", "Não existem juntas", "Uma cura a outra"],
+    "alternativas": [
+      "São a mesma doença",
+      "Podem ter sintomas parecidos",
+      "Não existem juntas",
+      "Uma cura a outra"
+    ],
     "resposta": 1,
     "curiosidade": "Febre e dores são comuns em ambas. Procure atendimento médico para diagnóstico correto!"
   },
   {
     "id": 48,
     "pergunta": "Vacina contra dengue:",
-    "alternativas": ["Não existe", "Existe, mas com restrições", "Cura dengue", "É obrigatória"],
+    "alternativas": [
+      "Não existe",
+      "Existe, mas com restrições",
+      "Cura dengue",
+      "É obrigatória"
+    ],
     "resposta": 1,
     "curiosidade": "Existe vacina, mas com indicações específicas. Consulte um médico para saber se pode tomar!"
   },
   {
     "id": 49,
     "pergunta": "Mutirões de limpeza são importantes porque:",
-    "alternativas": ["Não são importantes", "Mobilizam a comunidade", "Só limpam ruas", "Gastam dinheiro"],
+    "alternativas": [
+      "Não são importantes",
+      "Mobilizam a comunidade",
+      "Só limpam ruas",
+      "Gastam dinheiro"
+    ],
     "resposta": 1,
     "curiosidade": "Mutirões unem a comunidade e eliminam muitos criadouros de uma vez. Participe!"
   },
   {
     "id": 50,
     "pergunta": "O que fazer ao suspeitar de dengue?",
-    "alternativas": ["Ignorar", "Procurar atendimento médico", "Tomar qualquer remédio", "Esperar passar"],
+    "alternativas": [
+      "Ignorar",
+      "Procurar atendimento médico",
+      "Tomar qualquer remédio",
+      "Esperar passar"
+    ],
     "resposta": 1,
     "curiosidade": "NUNCA se automedique! Procure um médico para diagnóstico e tratamento adequado."
+  },
+  {
+    "id": 51,
+    "pergunta": "O que é o 'fumacê'?",
+    "alternativas": [
+      "Fumaça de churrasco",
+      "Inseticida disperso no ar",
+      "Neblina natural",
+      "Poluição"
+    ],
+    "resposta": 1,
+    "curiosidade": "O fumacê é uma medida emergencial para combater mosquitos adultos em áreas com muitos casos."
+  },
+  {
+    "id": 52,
+    "pergunta": "Qual a cor da larva do Aedes aegypti?",
+    "alternativas": [
+      "Vermelha",
+      "Verde",
+      "Marrom/Cinza",
+      "Azul"
+    ],
+    "resposta": 2,
+    "curiosidade": "As larvas são pequenas, movimentam-se muito e têm cor marrom ou cinza. Ficam na água!"
+  },
+  {
+    "id": 53,
+    "pergunta": "O Aedes aegypti gosta de:",
+    "alternativas": [
+      "Frio intenso",
+      "Calor e umidade",
+      "Vento forte",
+      "Neve"
+    ],
+    "resposta": 1,
+    "curiosidade": "O mosquito se reproduz mais rápido no calor e com chuvas (umidade). Verão é a época crítica!"
+  },
+  {
+    "id": 54,
+    "pergunta": "Vasos sanitários sem uso devem:",
+    "alternativas": [
+      "Ficar abertos",
+      "Estar sempre tampados",
+      "Ter plantas",
+      "Servir de lixeira"
+    ],
+    "resposta": 1,
+    "curiosidade": "Mantenha a tampa do vaso sanitário sempre fechada e dê descarga semanalmente se não usar."
+  },
+  {
+    "id": 55,
+    "pergunta": "Bandejas de geladeira podem acumular água?",
+    "alternativas": [
+      "Não",
+      "Sim, atrás da geladeira",
+      "Só nas novas",
+      "Gelo não derrete"
+    ],
+    "resposta": 1,
+    "curiosidade": "Sim! A bandeja atrás da geladeira acumula água do degelo. Verifique e limpe regularmente."
+  },
+  {
+    "id": 56,
+    "pergunta": "O que é 'controle biológico' da dengue?",
+    "alternativas": [
+      "Usar robôs",
+      "Usar peixes que comem larvas",
+      "Matar com a mão",
+      "Gritar com o mosquito"
+    ],
+    "resposta": 1,
+    "curiosidade": "Peixes como 'guppy' (lebiste) comem larvas do mosquito e podem ser usados em grandes reservatórios."
+  },
+  {
+    "id": 57,
+    "pergunta": "Repelentes naturais caseiros:",
+    "alternativas": [
+      "Substituem 100% os industriais",
+      "Ajudam, mas têm menor duração",
+      "São perigosos",
+      "Atraem mosquitos"
+    ],
+    "resposta": 1,
+    "curiosidade": "Repelentes caseiros (cravo, citronela) ajudam, mas duram menos tempo. Reaplique com frequência!"
+  },
+  {
+    "id": 58,
+    "pergunta": "O Aedes aegypti voa muito alto?",
+    "alternativas": [
+      "Sim, até as nuvens",
+      "Não, voa baixo (até 1,5m)",
+      "Voa como pássaro",
+      "Só anda no chão"
+    ],
+    "resposta": 1,
+    "curiosidade": "O mosquito geralmente voa baixo, na altura dos joelhos e pernas. Proteja essas áreas!"
+  },
+  {
+    "id": 59,
+    "pergunta": "Água de ar-condicionado:",
+    "alternativas": [
+      "É segura",
+      "Pode virar criadouro",
+      "É potável",
+      "Não existe"
+    ],
+    "resposta": 1,
+    "curiosidade": "A água que pinga do ar-condicionado pode acumular em poças ou baldes. Cuidado!"
+  },
+  {
+    "id": 60,
+    "pergunta": "O mosquito da dengue transmite febre amarela?",
+    "alternativas": [
+      "Sim, a urbana",
+      "Não",
+      "Só a silvestre",
+      "Transmite gripe"
+    ],
+    "resposta": 0,
+    "curiosidade": "Sim! O Aedes aegypti pode transmitir a febre amarela urbana. A vacina é a melhor proteção."
   }
 ]
