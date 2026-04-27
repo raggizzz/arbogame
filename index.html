@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arboviroses: O Último Santuário</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080604;--s1:#111009;--s2:#1a1712;--s3:#252118;
+  --acc:#c8730a;--acc2:#e8a020;--acc3:#f0c060;
+  --red:#cc2222;--red2:#ff5555;
+  --grn:#22882a;--grn2:#44bb55;
+  --blu:#1a52aa;--blu2:#5588ee;
+  --pur:#8844cc;
+  --txt:#e0d5c0;--txt2:#a09080;--txt3:#6a5a48;
+  --brd:#3a3020;--brd2:#4a3d28;
+  --eggs:#f0e040;--larvae:#40c040;--pupae:#6080f0;--adults:#cc3333;
+  --r:8px;
+}
+body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow:hidden}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;overflow:hidden}
+.screen.active{display:flex}
+
+/* ── HUD ─────────────────────────────────────── */
+#hud{background:var(--s1);border-bottom:1px solid var(--brd2);padding:.5rem 1rem;display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;flex-shrink:0;z-index:10}
+.hud-title{font-size:.7rem;font-weight:900;color:var(--acc2);letter-spacing:2px;white-space:nowrap;margin-right:.5rem}
+.hstat{display:flex;align-items:center;gap:.4rem}
+.hstat-label{font-size:.6rem;color:var(--txt3);text-transform:uppercase;letter-spacing:1px}
+.hstat-val{font-size:1rem;font-weight:900;line-height:1}
+.hv-energy{color:var(--grn2)}
+.hv-neg{color:var(--acc2)}
+.hv-neg.warn{color:var(--red2);animation:pulse .7s infinite alternate}
+.hv-round{color:var(--acc3)}
+.hv-actions{color:var(--blu2)}
+@keyframes pulse{from{opacity:1}to{opacity:.4}}
+.hud-bar{height:6px;border-radius:3px;background:#1a1a1a;overflow:hidden;width:80px}
+.hbar-fill{height:100%;border-radius:3px;transition:width .4s}
+.hbar-e{background:linear-gradient(90deg,var(--grn),var(--grn2))}
+.hbar-n{background:linear-gradient(90deg,#882222,var(--red2))}
+.phase-badge{padding:3px 10px;border-radius:12px;font-size:.65rem;font-weight:700;letter-spacing:1px;background:rgba(200,115,10,.2);border:1px solid var(--acc);color:var(--acc2);white-space:nowrap}
+
+/* ── MAIN LAYOUT ─────────────────────────────── */
+#game-body{display:grid;grid-template-columns:1fr 280px;flex:1;overflow:hidden;gap:0}
+#map-area{display:flex;align-items:center;justify-content:center;padding:1rem;position:relative;overflow:hidden}
+
+/* ── MAP ─────────────────────────────────────── */
+#map{display:grid;grid-template-columns:repeat(3,180px);grid-template-rows:repeat(3,140px);gap:.5rem;position:relative}
+.conn-line{position:absolute;background:rgba(74,61,40,.5);z-index:0;pointer-events:none}
+.cl-v{width:2px;left:50%;transform:translateX(-50%)}
+.cl-h{height:2px;top:50%;transform:translateY(-50%)}
+.neigh{background:var(--s2);border:2px solid var(--brd);border-radius:12px;padding:.75rem;cursor:pointer;transition:border-color .2s,box-shadow .2s,background .2s;position:relative;z-index:1;display:flex;flex-direction:column;overflow:hidden}
+.neigh:hover{border-color:var(--acc);background:var(--s3)}
+.neigh.selected-target{border-color:var(--acc2) !important;box-shadow:0 0 18px rgba(232,160,32,.4);animation:pulse-sel 1s infinite alternate}
+@keyframes pulse-sel{from{box-shadow:0 0 8px rgba(232,160,32,.2)}to{box-shadow:0 0 24px rgba(232,160,32,.5)}}
+.neigh.state-none{border-color:var(--brd)}
+.neigh.state-eggs{border-color:var(--eggs)}
+.neigh.state-larvae{border-color:var(--larvae)}
+.neigh.state-pupae{border-color:var(--pupae)}
+.neigh.state-adults{border-color:var(--adults);animation:danger-pulse 1.5s infinite}
+@keyframes danger-pulse{0%,100%{box-shadow:0 0 6px rgba(204,51,51,.2)}50%{box-shadow:0 0 20px rgba(204,51,51,.6)}}
+.n-head{display:flex;align-items:flex-start;gap:.35rem;margin-bottom:.3rem}
+.n-icon{font-size:1.3rem;line-height:1}
+.n-info{flex:1;min-width:0}
+.n-name{font-size:.72rem;font-weight:700;color:var(--txt);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.n-risk{font-size:.55rem;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px}
+.n-risk.high{color:var(--red2)}
+.n-risk.medium{color:var(--acc)}
+.n-risk.low{color:var(--grn2)}
+.n-foci{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto;min-height:28px}
+.ficon{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid;transition:transform .2s}
+.fi-eggs{background:rgba(240,224,64,.15);border-color:var(--eggs)}
+.fi-larvae{background:rgba(64,192,64,.15);border-color:var(--larvae)}
+.fi-pupae{background:rgba(96,128,240,.15);border-color:var(--pupae)}
+.fi-adults{background:rgba(204,51,51,.15);border-color:var(--adults);animation:buzz .5s infinite}
+.fi-hidden{background:rgba(160,144,128,.08);border-color:var(--txt3)}
+@keyframes buzz{0%,100%{transform:translateX(0)}30%{transform:translateX(1px)}70%{transform:translateX(-1px)}}
+.n-badges{display:flex;gap:3px;flex-wrap:wrap;margin-top:.25rem}
+.nbadge{padding:1px 5px;border-radius:3px;font-size:.55rem;font-weight:700}
+.nb-ovi{background:rgba(34,136,42,.15);border:1px solid var(--grn);color:var(--grn2)}
+.nb-prot{background:rgba(26,82,170,.15);border:1px solid var(--blu);color:var(--blu2)}
+.n-clean{font-size:.65rem;color:var(--grn2);font-style:italic;margin-top:.3rem}
+.n-spacer{} /* empty grid cell */
+/* Grid placement */
+.n-jardim{grid-column:2;grid-row:1}
+.n-vila{grid-column:1;grid-row:2}
+.n-centro{grid-column:2;grid-row:2}
+.n-escola{grid-column:3;grid-row:2}
+.n-favela{grid-column:2;grid-row:3}
+
+/* ── RIGHT PANEL ─────────────────────────────── */
+#right-panel{background:var(--s1);border-left:1px solid var(--brd);display:flex;flex-direction:column;overflow:hidden}
+.panel-section{border-bottom:1px solid var(--brd);padding:.75rem}
+.ps-title{font-size:.6rem;text-transform:uppercase;letter-spacing:2px;color:var(--txt3);margin-bottom:.6rem}
+
+/* ── EVENT CARD ──────────────────────────────── */
+.event-card{background:var(--s2);border:1px solid var(--brd2);border-radius:var(--r);padding:.75rem;min-height:60px}
+.ec-type{display:inline-block;padding:2px 7px;border-radius:3px;font-size:.6rem;font-weight:700;letter-spacing:1px;margin-bottom:.4rem}
+.ect-event{background:rgba(200,115,10,.2);border:1px solid var(--acc);color:var(--acc2)}
+.ect-rain{background:rgba(40,80,220,.2);border:1px solid #4466cc;color:#80a0ff}
+.ect-char{background:rgba(80,120,220,.2);border:1px solid var(--blu);color:var(--blu2)}
+.ect-know{background:rgba(40,180,40,.2);border:1px solid var(--grn);color:var(--grn2)}
+.ec-name{font-size:.85rem;font-weight:700;color:var(--acc2);margin-bottom:.3rem}
+.ec-text{font-size:.72rem;color:var(--txt2);font-style:italic;line-height:1.5}
+.no-event{font-size:.72rem;color:var(--txt3);font-style:italic}
+
+/* ── ACTIONS ─────────────────────────────────── */
+.actions-list{display:flex;flex-direction:column;gap:.3rem;flex:1;overflow-y:auto;padding:.75rem}
+.action-btn{background:var(--s2);border:1px solid var(--brd2);border-radius:var(--r);padding:.55rem .65rem;cursor:pointer;text-align:left;color:var(--txt);font-family:inherit;transition:all .15s;width:100%}
+.action-btn:hover:not(:disabled){background:var(--s3);border-color:var(--acc)}
+.action-btn:disabled{opacity:.35;cursor:not-allowed}
+.action-btn.selected-act{background:rgba(200,115,10,.15);border-color:var(--acc2);color:var(--acc2)}
+.ab-row{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.ab-name{font-size:.78rem;font-weight:600}
+.ab-cost{font-size:.65rem;color:var(--acc);font-weight:700;white-space:nowrap}
+.ab-desc{font-size:.62rem;color:var(--txt3);margin-top:.15rem;line-height:1.3}
+.ab-coop{font-size:.58rem;color:var(--pur);margin-top:.1rem}
+.end-turn-btn{width:100%;padding:.65rem;background:rgba(200,115,10,.12);border:1px solid var(--acc);border-radius:var(--r);color:var(--acc2);font-weight:700;font-size:.8rem;cursor:pointer;letter-spacing:1px;font-family:inherit;transition:all .2s;margin:.5rem}
+.end-turn-btn:hover:not(:disabled){background:var(--acc);color:#fff}
+.end-turn-btn:disabled{opacity:.3;cursor:not-allowed}
+
+/* ── LOG ─────────────────────────────────────── */
+.log-list{max-height:110px;overflow-y:auto;padding:.5rem .75rem;display:flex;flex-direction:column;gap:.15rem}
+.log-entry{font-size:.68rem;line-height:1.4;padding:.1rem 0}
+.le-info{color:var(--txt2)}
+.le-ok{color:var(--grn2)}
+.le-bad{color:var(--red2)}
+.le-warn{color:var(--acc2)}
+.le-turn{color:var(--acc3);font-weight:700;border-top:1px solid var(--brd);padding-top:.3rem;margin-top:.2rem}
+.le-event{color:var(--blu2)}
+
+/* ── MODALS ──────────────────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:100;display:none;align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal-box{background:var(--s2);border:2px solid var(--acc);border-radius:14px;padding:1.5rem;max-width:480px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-box.quiz-box{border-color:var(--grn)}
+.modal-type{display:inline-block;padding:2px 8px;border-radius:3px;font-size:.6rem;font-weight:700;letter-spacing:1px;margin-bottom:.5rem}
+.mt-event{background:rgba(200,115,10,.2);border:1px solid var(--acc);color:var(--acc2)}
+.mt-rain{background:rgba(40,80,220,.2);border:1px solid #4466cc;color:#80a0ff}
+.mt-know{background:rgba(40,180,40,.2);border:1px solid var(--grn);color:var(--grn2)}
+.modal-title{font-size:1.1rem;font-weight:700;color:var(--acc2);margin-bottom:.75rem}
+.modal-quote{font-style:italic;border-left:3px solid var(--acc);padding-left:.75rem;color:#d4c8a8;line-height:1.8;margin-bottom:.75rem;font-size:.85rem}
+.modal-effects{background:var(--s3);border-radius:6px;padding:.65rem;font-size:.78rem;color:var(--txt2);line-height:1.6;margin-bottom:1rem}
+.modal-effects strong{color:var(--txt)}
+.quiz-q{font-size:.9rem;font-weight:600;color:var(--txt);line-height:1.5;margin-bottom:1rem}
+.quiz-opts{display:grid;gap:.4rem;margin-bottom:.75rem}
+.qopt{background:var(--s3);border:1px solid var(--brd2);border-radius:var(--r);padding:.6rem .9rem;cursor:pointer;text-align:left;color:var(--txt);font-size:.82rem;font-family:inherit;transition:all .15s;width:100%}
+.qopt:hover:not(:disabled){border-color:var(--acc2)}
+.qopt:disabled{cursor:default}
+.qopt.correct{background:rgba(34,136,42,.2);border-color:var(--grn);color:#aaeebb}
+.qopt.wrong{background:rgba(204,34,34,.2);border-color:var(--red);color:#ee8888}
+.quiz-fb{padding:.6rem .75rem;border-radius:6px;font-size:.78rem;line-height:1.5;margin-bottom:.75rem;display:none}
+.quiz-fb.show{display:block}
+.qfb-ok{background:rgba(34,136,42,.12);border:1px solid var(--grn);color:var(--grn2)}
+.qfb-bad{background:rgba(204,34,34,.12);border:1px solid var(--red);color:var(--red2)}
+
+/* ── INTRO ───────────────────────────────────── */
+#screen-intro{align-items:center;justify-content:center;padding:2rem;text-align:center;background:radial-gradient(ellipse at center,#1a0a00 0%,#000 70%)}
+.intro-logo{font-size:clamp(1.8rem,4vw,3rem);font-weight:900;color:var(--acc2);letter-spacing:3px;text-shadow:0 0 40px rgba(200,115,10,.7);margin-bottom:.3rem;line-height:1.1}
+.intro-sub{font-size:.85rem;color:var(--acc);letter-spacing:5px;text-transform:uppercase;margin-bottom:2rem}
+.intro-narration{max-width:620px;background:rgba(200,115,10,.06);border-left:3px solid var(--acc);border-radius:4px;padding:1.2rem 1.5rem;font-style:italic;line-height:1.9;color:#d4c8a8;font-size:.88rem;margin-bottom:2rem;text-align:left}
+.intro-narration p{margin-bottom:.6rem}
+
+/* ── CHAR SELECT ─────────────────────────────── */
+#screen-charselect{align-items:center;justify-content:center;padding:1.5rem;background:radial-gradient(ellipse at center,#1a0a00 0%,#000 70%)}
+.char-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;max-width:640px;width:100%;margin:1.2rem 0}
+.char-card{background:var(--s2);border:2px solid var(--brd2);border-radius:12px;padding:1rem;cursor:pointer;transition:all .2s;position:relative}
+.char-card:hover{background:var(--s3)}
+.char-card.chosen{border-color:var(--acc2);box-shadow:0 0 16px rgba(232,160,32,.3)}
+.char-card.chosen::after{content:'✓';position:absolute;top:.5rem;right:.6rem;color:var(--acc2);font-size:.9rem;font-weight:900}
+.cc-icon{font-size:2rem;margin-bottom:.3rem}
+.cc-name{font-size:.95rem;font-weight:700;color:var(--acc2);margin-bottom:.15rem}
+.cc-role{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--txt3);margin-bottom:.5rem}
+.cc-passive{font-size:.72rem;color:var(--txt2);line-height:1.4;margin-bottom:.2rem}
+.cc-active{font-size:.72rem;color:var(--blu2);line-height:1.4;margin-bottom:.2rem}
+.cc-weak{font-size:.7rem;color:var(--red2);line-height:1.3}
+.char-note{font-size:.75rem;color:var(--txt2);text-align:center;margin-bottom:.75rem}
+
+/* ── END SCREEN ──────────────────────────────── */
+#screen-end{align-items:center;justify-content:center;padding:2rem;text-align:center;background:#000}
+.end-title{font-size:clamp(2.5rem,6vw,4rem);font-weight:900;margin-bottom:.4rem;line-height:1}
+.end-title.v{color:var(--grn2);text-shadow:0 0 40px rgba(68,187,85,.5)}
+.end-title.d{color:var(--red2);text-shadow:0 0 40px rgba(255,85,85,.5)}
+.end-sub{font-size:1rem;color:var(--txt2);letter-spacing:3px;text-transform:uppercase;margin-bottom:1.5rem}
+.end-quote{max-width:540px;font-style:italic;color:var(--acc2);border-left:3px solid var(--acc);padding-left:1rem;text-align:left;line-height:1.9;font-size:.9rem;margin-bottom:1.5rem}
+.end-effect{max-width:540px;background:var(--s2);border:1px solid var(--brd2);border-radius:10px;padding:1rem;font-size:.82rem;color:var(--txt2);line-height:1.6;margin-bottom:1.5rem;text-align:left}
+.end-stats{display:flex;gap:2rem;justify-content:center;margin-bottom:1.5rem;flex-wrap:wrap}
+.estat{text-align:center}
+.estat-v{font-size:2rem;font-weight:900;color:var(--acc2)}
+.estat-l{font-size:.65rem;color:var(--txt3);text-transform:uppercase;letter-spacing:1px}
+
+/* ── BUTTONS ─────────────────────────────────── */
+.btn{padding:.65rem 1.8rem;border-radius:var(--r);border:none;cursor:pointer;font-size:.9rem;font-weight:700;font-family:inherit;transition:all .2s;letter-spacing:1px}
+.btn-primary{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;box-shadow:0 4px 18px rgba(200,115,10,.35)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(200,115,10,.55)}
+.btn-secondary{background:transparent;border:1px solid var(--acc);color:var(--acc2)}
+.btn-secondary:hover{background:rgba(200,115,10,.1)}
+.btn-sm{padding:.4rem 1rem;font-size:.75rem;border-radius:6px}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{background:var(--red2)}
+
+/* ── HERO DISPLAY ────────────────────────────── */
+.hero-bar{display:flex;gap:.5rem;padding:.4rem .75rem;flex-wrap:wrap}
+.hero-chip{padding:3px 9px;border-radius:12px;font-size:.68rem;font-weight:700;border:1px solid}
+
+/* ── MISC ────────────────────────────────────── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--s1)}
+::-webkit-scrollbar-thumb{background:var(--acc);border-radius:2px}
+.mq-particle{position:fixed;pointer-events:none;font-size:11px;opacity:0;animation:mq-float linear infinite;z-index:0}
+@keyframes mq-float{0%{opacity:0;transform:translate(0,0)}15%{opacity:.3}85%{opacity:.1}100%{opacity:0;transform:translate(var(--tx),var(--ty))}}
+@media(max-width:800px){
+  #game-body{grid-template-columns:1fr}
+  #right-panel{display:none}
+  #map{grid-template-columns:repeat(3,140px);grid-template-rows:repeat(3,120px)}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ SCREEN: INTRO ═══════════ -->
+<div class="screen active" id="screen-intro">
+  <div class="intro-logo">ARBOVIROSES<br>O ÚLTIMO SANTUÁRIO</div>
+  <div class="intro-sub">A Cidade em Colapso</div>
+  <div class="intro-narration">
+    <p>O mundo não terminou em explosões nem foi consumido por chamas. A queda veio silenciosa, trazida nas asas de um inimigo minúsculo: o <em>Aedes aegypti</em>.</p>
+    <p>Enquanto as cidades cresciam desordenadas, o mosquito se adaptava. Nas sombras do descaso, ele encontrou abrigo em tampas mal vedadas, em pneus esquecidos, em garrafas abandonadas.</p>
+    <p>Agora, em meio às ruínas urbanas, surgem os <strong>Santuários Livres de Dengue</strong>. Territórios protegidos não por muros ou armas — mas por vigilância, conhecimento e ação coletiva.</p>
+    <p><em>Quem conseguirá proteger seu Santuário… antes que o mosquito volte a atacar?</em></p>
+  </div>
+  <button class="btn btn-primary" onclick="showScreen('charselect')">▶ INICIAR MISSÃO</button>
+</div>
+
+<!-- ═══════════ SCREEN: CHAR SELECT ═══════════ -->
+<div class="screen" id="screen-charselect">
+  <div style="text-align:center;margin-bottom:.5rem;padding-top:1rem">
+    <div style="font-size:1.2rem;font-weight:900;color:var(--acc2);letter-spacing:2px">SELECIONAR EQUIPE</div>
+    <div class="char-note" style="margin-top:.4rem">Escolha 2 a 4 agentes. Cada agente adiciona 2 ações por rodada.</div>
+  </div>
+  <div class="char-grid" id="char-grid"></div>
+  <div id="char-count" style="font-size:.8rem;color:var(--txt2);text-align:center;margin-bottom:.75rem">Nenhum agente selecionado</div>
+  <button class="btn btn-primary" id="btn-start-game" onclick="startGame()" disabled>▶ INICIAR</button>
+</div>
+
+<!-- ═══════════ SCREEN: GAME ═══════════ -->
+<div class="screen" id="screen-game">
+  <!-- HUD -->
+  <div id="hud">
+    <div class="hud-title">🦟 ARBOVIROSES</div>
+    <div class="hstat">
+      <div>
+        <div class="hstat-label">Energia</div>
+        <div class="hud-bar"><div class="hbar-fill hbar-e" id="bar-e"></div></div>
+      </div>
+      <div class="hstat-val hv-energy" id="hv-e">12⚡</div>
+    </div>
+    <div class="hstat">
+      <div>
+        <div class="hstat-label">Negligência</div>
+        <div class="hud-bar"><div class="hbar-fill hbar-n" id="bar-n"></div></div>
+      </div>
+      <div class="hstat-val hv-neg" id="hv-n">0/10</div>
+    </div>
+    <div class="hstat">
+      <span class="hstat-label">Turno</span>
+      <span class="hstat-val hv-round" id="hv-r">1/10</span>
+    </div>
+    <div class="hstat">
+      <span class="hstat-label">Ações</span>
+      <span class="hstat-val hv-actions" id="hv-a">4</span>
+    </div>
+    <div class="phase-badge" id="hv-phase">Aguardando</div>
+    <div class="hero-bar" id="hero-bar"></div>
+  </div>
+
+  <!-- Body -->
+  <div id="game-body">
+    <!-- Map -->
+    <div id="map-area">
+      <div id="map">
+        <!-- Neighborhoods injected by JS -->
+      </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div id="right-panel">
+      <!-- Event Card -->
+      <div class="panel-section">
+        <div class="ps-title">📋 Evento Atual</div>
+        <div class="event-card" id="cur-event">
+          <div class="no-event">Aguardando primeiro evento...</div>
+        </div>
+        <button class="btn btn-primary btn-sm" id="btn-draw" onclick="drawEvent()" style="width:100%;margin-top:.5rem">▶ Revelar Evento</button>
+      </div>
+
+      <!-- Actions -->
+      <div class="panel-section" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+        <div class="ps-title">⚡ Ações Disponíveis</div>
+        <div class="actions-list" id="actions-list"></div>
+        <button class="end-turn-btn" id="btn-end-turn" onclick="endTurn()" disabled>⏩ Encerrar Turno</button>
+      </div>
+
+      <!-- Log -->
+      <div class="panel-section" style="padding-bottom:.4rem">
+        <div class="ps-title">📜 Diário</div>
+        <div class="log-list" id="log-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SCREEN: END ═══════════ -->
+<div class="screen" id="screen-end">
+  <div class="end-title" id="end-title">—</div>
+  <div class="end-sub" id="end-sub">—</div>
+  <div class="end-quote" id="end-quote">—</div>
+  <div class="end-stats" id="end-stats"></div>
+  <div class="end-effect" id="end-effect">—</div>
+  <button class="btn btn-primary" onclick="location.reload()">↺ JOGAR NOVAMENTE</button>
+</div>
+
+<!-- ═══════════ OVERLAYS ═══════════ -->
+<!-- Event Modal -->
+<div class="overlay" id="ov-event">
+  <div class="modal-box">
+    <div class="modal-type" id="ev-type">Evento</div>
+    <div class="modal-title" id="ev-name">—</div>
+    <div class="modal-quote" id="ev-quote">—</div>
+    <div class="modal-effects" id="ev-effects">—</div>
+    <button class="btn btn-primary" onclick="applyEventAndClose()">✓ Aplicar &amp; Continuar</button>
+  </div>
+</div>
+
+<!-- Quiz Modal -->
+<div class="overlay" id="ov-quiz">
+  <div class="modal-box quiz-box">
+    <div class="modal-type mt-know">📚 Carta de Conhecimento</div>
+    <div class="modal-title" style="margin-top:.4rem">Desafio!</div>
+    <div class="quiz-q" id="qz-q">—</div>
+    <div class="quiz-opts" id="qz-opts"></div>
+    <div class="quiz-fb" id="qz-fb"></div>
+    <button class="btn btn-primary" id="qz-btn" onclick="closeQuizModal()" style="display:none">Continuar</button>
+  </div>
+</div>
+
+<!-- Target Select Info -->
+<div id="target-info" style="display:none;position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:var(--s2);border:1px solid var(--acc2);border-radius:8px;padding:.6rem 1.2rem;font-size:.82rem;color:var(--acc2);z-index:50;text-align:center;pointer-events:none">
+  Clique em um bairro destacado para executar a ação
+  <button style="position:absolute;right:.4rem;top:.3rem;background:none;border:none;color:var(--txt3);cursor:pointer;font-size:.9rem;pointer-events:all" onclick="cancelAction()">✕</button>
+</div>
+
+<script>
+'use strict';
+// ─────────────────────────────────────────────────────────────
+// CONSTANTS
+// ─────────────────────────────────────────────────────────────
+const NEIGH_DEFS = [
+  {id:0,name:'Centro',       icon:'🏙️',risk:'high',  pos:'n-centro',  adj:[1,2,3,4]},
+  {id:1,name:'Vila Operária',icon:'🏘️',risk:'medium',pos:'n-vila',    adj:[0]},
+  {id:2,name:'Jardim',       icon:'🌿',risk:'low',   pos:'n-jardim',  adj:[0]},
+  {id:3,name:'Escola',       icon:'🏫',risk:'medium',pos:'n-escola',  adj:[0]},
+  {id:4,name:'Favela do Rio',icon:'⛺',risk:'high',  pos:'n-favela',  adj:[0]},
+];
+
+const HERO_DEFS = [
+  {id:'gabriel', name:'Gabriel',    role:'Guardião',    icon:'👦', color:'#c8730a',
+   passive:'Fumacê sozinho: 3⚡ + 2 ações',
+   special:'O Dragão (1×): Fumacê em 2 bairros por 5⚡',
+   weakness:'Negligência ≥7 → perde 1 ação/turno'},
+  {id:'lucia',   name:'Dona Lúcia', role:'Mentora',     icon:'👩', color:'#5080cc',
+   passive:'Conhecimento correto: +1⚡ extra',
+   special:'Caderno (1×): desfaz 1 efeito de evento',
+   weakness:'Mutirão custa +1⚡'},
+  {id:'tecnico', name:'Técnico',    role:'Especialista',icon:'🧑‍⚕️',color:'#22882a',
+   passive:'Larvário: −1⚡ (mín. 1)',
+   special:'Ovitrampa total (1×): instala em todos os bairros',
+   weakness:'Não pode usar Fumacê'},
+  {id:'agente',  name:'Agente',     role:'Organizador', icon:'🧑', color:'#8844cc',
+   passive:'Mutirão sem 2ª pessoa necessária',
+   special:'Energia (1×): recupera 4⚡ sem ação',
+   weakness:'Sanear requer outro herói no bairro'},
+];
+
+const QUESTIONS = [
+  {q:'Onde o Aedes aegypti deposita seus ovos?',
+   opts:['No solo úmido','Nas bordas internas de recipientes, acima da linha d\'água','Em vegetação densa','Dentro da água'],
+   c:1, expl:'Os ovos ficam nas bordas internas, acima da linha d\'água — isso lhes dá resistência à dessecação.'},
+  {q:'O que é uma ovitrampa?',
+   opts:['Bomba de inseticida','Armadilha de oviposição para monitorar o mosquito','Carro-fumacê portátil','Repelente químico'],
+   c:1, expl:'Ovitrampas são armadilhas de baixo custo que detectam a presença e densidade do Aedes aegypti.'},
+  {q:'Cerca de 42% dos criadouros estão em qual tipo de depósito?',
+   opts:['Pneus e latas','Calhas e telhados','Depósitos de água para consumo humano (A2)','Bromélias e plantas'],
+   c:2, expl:'Depósitos A2 (tinas, baldes, tonéis) representam ~42% dos criadouros — exigem limpeza periódica.'},
+  {q:'O IIP acima de qual valor indica risco de surto?',
+   opts:['1%','2%','4%','10%'],
+   c:2, expl:'IIP > 4% indica risco de surto. Entre 1-3,9% é alerta; abaixo de 1% é situação satisfatória.'},
+  {q:'O fumacê (UBV) elimina os criadouros do mosquito?',
+   opts:['Sim, de forma definitiva','Sim, por 30 dias','Não — tem efeito temporário e não elimina criadouros','Apenas em áreas fechadas'],
+   c:2, expl:'O fumacê é medida emergencial e temporária. Sem eliminar criadouros, novos mosquitos continuarão surgindo.'},
+  {q:'Quais doenças o Aedes aegypti transmite?',
+   opts:['Malária e leptospirose','Dengue, Zika e Chikungunya','Apenas dengue','Febre amarela e dengue'],
+   c:1, expl:'O Aedes aegypti é vetor de dengue, Zika e Chikungunya — as principais arboviroses urbanas.'},
+  {q:'O método Wolbachia consiste em:',
+   opts:['Aplicação de veneno nos criadouros','Liberação de mosquitos com bactéria que reduz transmissão viral','Fumigação semanal da cidade','Esterilização de larvas com radiação'],
+   c:1, expl:'A bactéria Wolbachia, ao infectar o mosquito, reduz sua capacidade de transmitir dengue, Zika e Chikungunya.'},
+  {q:'Ovos do Aedes aegypti sobrevivem à seca?',
+   opts:['Não — morrem em dias','Apenas com umidade acima de 80%','Sim — ficam viáveis por meses nas superfícies dos recipientes','Sim, mas apenas dentro d\'água'],
+   c:2, expl:'Os ovos resistem à dessecação e podem permanecer viáveis por meses, esperando a próxima chuva para eclodir.'},
+  {q:'Qual é a principal estratégia de prevenção das arboviroses?',
+   opts:['Fumigação semanal','Vacinação em massa','Controle mecânico: eliminar criadouros','Uso de repelentes por toda a população'],
+   c:2, expl:'O controle mecânico e ambiental (eliminar criadouros) é a principal e mais eficaz estratégia de prevenção.'},
+  {q:'O que acontece com larvas ignoradas ao fim da rodada?',
+   opts:['Morrem naturalmente','Se dispersam para outros bairros','Evoluem para pupas automaticamente','Permanecem como larvas indefinidamente'],
+   c:2, expl:'Larvas não eliminadas evoluem para pupas — e pupas não eliminadas se tornam adultos. A velocidade do ciclo exige ação imediata.'},
+];
+
+// Events: {id, type, name, quote, effectDesc, apply(state)}
+const EVENT_DEFS = [
+  {id:'e1',type:'event',name:'Ninho Escondido',
+   quote:'"Vasos, calhas e caixas d\'água exibem pontos escuros grudados nas bordas."',
+   effectDesc:'Adiciona 1 ovo nos 2 bairros de risco alto.',
+   apply(S){const highs=S.neighborhoods.filter(n=>n.risk==='high');highs.forEach(n=>addFocus(S,n.id,'eggs'));log('Ovos detectados nos bairros de alto risco!','le-event')}},
+  {id:'e2',type:'event',name:'Ninho Escondido',
+   quote:'"Recipientes esquecidos guardam segredos perigosos nas bordas internas."',
+   effectDesc:'Adiciona 1 ovo nos 2 bairros de risco alto.',
+   apply(S){const highs=S.neighborhoods.filter(n=>n.risk==='high');highs.forEach(n=>addFocus(S,n.id,'eggs'));log('Ovos detectados nos bairros de alto risco!','le-event')}},
+  {id:'e3',type:'event',name:'Água Parada',
+   quote:'"Em pneus e baldes esquecidos, a água limpa ferve com larvas."',
+   effectDesc:'Adiciona 1 larva no bairro com mais focos.',
+   apply(S){const n=S.neighborhoods.reduce((a,b)=>b.foci.length>a.foci.length?b:a,S.neighborhoods[0]);addFocus(S,n.id,'larvae');log(`Larvas em ${n.name}!`,'le-bad')}},
+  {id:'e4',type:'event',name:'Água Parada',
+   quote:'"Cada recipiente esquecido é uma armadilha preparada para o próximo mosquito."',
+   effectDesc:'Adiciona 1 larva no bairro com mais focos.',
+   apply(S){const n=S.neighborhoods.reduce((a,b)=>b.foci.length>a.foci.length?b:a,S.neighborhoods[0]);addFocus(S,n.id,'larvae');log(`Larvas em ${n.name}!`,'le-bad')}},
+  {id:'r1',type:'rain',name:'Chuva Pesada',
+   quote:'"A chuva cai sobre a cidade destruída. Onde havia ovos, agora há larvas."',
+   effectDesc:'CASCATA: ovos→larvas, larvas→pupas, pupas→adultos. +1 ovo no bairro mais infestado.',
+   apply(S){rainCascade(S);log('⛈ CHUVA PESADA! Cascata completa!','le-bad')}},
+  {id:'r2',type:'rain',name:'Chuva Pesada',
+   quote:'"A tempestade activa ovos que esperavam em silêncio."',
+   effectDesc:'CASCATA completa + 1 ovo em bairro limpo.',
+   apply(S){
+     rainCascade(S);
+     const clean=S.neighborhoods.filter(n=>n.foci.length===0);
+     if(clean.length>0){const n=clean[Math.floor(Math.random()*clean.length)];addFocus(S,n.id,'eggs');log(`Ovos em ${n.name} após a tempestade!`,'le-bad')}
+     log('⛈ TEMPESTADE!','le-bad')}},
+  {id:'e5',type:'event',name:'Descaso Coletivo',
+   quote:'"A inação não é neutra. Ela se acumula e amplifica os riscos."',
+   effectDesc:'Negligência +2.',
+   apply(S){changeNeg(S,2);log('Negligência +2 por descaso coletivo.','le-warn')}},
+  {id:'e6',type:'event',name:'Foco Crítico',
+   quote:'"O problema piora onde já está ruim."',
+   effectDesc:'Adiciona 1 marcador do tipo já presente no bairro mais infestado.',
+   apply(S){
+     const n=S.neighborhoods.reduce((a,b)=>b.foci.length>a.foci.length?b:a,S.neighborhoods[0]);
+     if(n.foci.length>0){const t=n.foci[0].type;addFocus(S,n.id,t);log(`Foco crítico em ${n.name}!`,'le-bad')}
+     else{log('Nenhum foco para agravar.','le-info')}}},
+  {id:'e7',type:'event',name:'Presente ao Mosquito',
+   quote:'"Cada criadouro ignorado é um presente para o Aedes aegypti."',
+   effectDesc:'Se 3+ focos não tratados: +1 adulto no bairro mais infestado.',
+   apply(S){
+     const total=S.neighborhoods.reduce((s,n)=>s+n.foci.length,0);
+     if(total>=3){const n=S.neighborhoods.reduce((a,b)=>b.foci.length>a.foci.length?b:a,S.neighborhoods[0]);addFocus(S,n.id,'adults');log(`Adultos em ${n.name} — ${total} focos ignorados!`,'le-bad')}
+     else{log('Presente ao Mosquito: grupo controlou os focos a tempo.','le-ok')}}},
+  {id:'e8',type:'event',name:'Calmaria',
+   quote:'"Uma rara janela de tranquilidade. Usem bem."',
+   effectDesc:'Nenhum foco novo esta rodada. Recupera 2⚡.',
+   apply(S){changeEnergy(S,2);log('Calmaria: +2⚡ recuperados. Aproveite!','le-ok')}},
+  {id:'c1',type:'char',name:'Lembrança de Dona Lúcia',
+   quote:'"Não basta eliminar o mosquito. É preciso eliminar o esquecimento."',
+   effectDesc:'Próxima ação de Sanear recupera 1⚡ ao executar.',
+   apply(S){S.flags.saneBonus=true;log('Dona Lúcia: próximo Sanear recupera 1⚡.','le-ok')}},
+  {id:'c2',type:'char',name:'O Dragão Desperta',
+   quote:'"O rugido do carro-fumacê corta o silêncio da cidade."',
+   effectDesc:'Fumacê custa 2⚡ a menos nesta rodada.',
+   apply(S){S.flags.fumaceDiscount=2;log('O Dragão: Fumacê com desconto nesta rodada!','le-ok')}},
+  {id:'c3',type:'char',name:'Mutirão Espontâneo',
+   quote:'"Moradores se unem sem aviso. A luta coletiva não precisa de convocação."',
+   effectDesc:'Remove 3 focos (não adultos) de qualquer bairro gratuitamente.',
+   apply(S){S.flags.mutiraoFree=true;log('Mutirão Espontâneo: remova 3 focos grátis!','le-ok')}},
+  {id:'k1',type:'know',name:'Desafio de Conhecimento',
+   quote:'"O conhecimento é a verdadeira arma contra a dengue."',
+   effectDesc:'Responda corretamente: +2⚡. Errou: −1⚡, −1 ação.',
+   apply(S){openQuiz(S)}},
+  {id:'k2',type:'know',name:'Desafio de Conhecimento',
+   quote:'"Dona Lúcia abre o Caderno. Cada página salva uma vida."',
+   effectDesc:'Responda corretamente: +3⚡. Errou: −1⚡.',
+   apply(S){openQuiz(S,true)}},
+];
+
+// ─────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────
+const G = {
+  energy:12, maxEnergy:20, negligence:0,
+  round:1, maxRounds:10,
+  actionsLeft:4, actionsTotal:4,
+  phase:'idle', // idle|event|action|evolve|proliferate|neg|check
+  selectedHeroes:[],
+  neighborhoods: NEIGH_DEFS.map(n=>({...n, foci:[], ovitraps:0, adultsInARow:0})),
+  deck:[], currentCard:null,
+  log:[], logId:0,
+  flags:{saneBonus:false,fumaceDiscount:0,mutiraoFree:false},
+  selectedAction:null,
+  heroSpecialUsed:new Set(),
+  questionsUsed:new Set(),
+  stats:{focsElim:0,cardsDrawn:0,qCorrect:0,qWrong:0,actsDone:0},
+  gameOver:false,
+  quizCallback:null,
+  quizBonus:false,
+};
+
+// ─────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────
+function addFocus(S,id,type){
+  const n=S.neighborhoods[id];
+  const count=n.foci.filter(f=>f.type===type).length;
+  if(count>=3)return;
+  // if exceeding 3 total: upgrade most advanced
+  if(n.foci.length>=3){
+    const order=['eggs','larvae','pupae','adults'];
+    let most=-1;n.foci.forEach(f=>{const i=order.indexOf(f.type);if(i>most)most=i;});
+    const idx=n.foci.findIndex(f=>f.type===order[most]);
+    if(most<3)n.foci[idx].type=order[most+1];
+    else return;
+  } else {
+    n.foci.push({type});
+  }
+}
+
+function removeFocus(S,id,type){
+  const n=S.neighborhoods[id];
+  const idx=n.foci.findIndex(f=>f.type===type);
+  if(idx>=0){n.foci.splice(idx,1);S.stats.focsElim++;}
+}
+
+function changeEnergy(S,delta){S.energy=Math.max(0,Math.min(S.maxEnergy,S.energy+delta));}
+function changeNeg(S,delta){S.negligence=Math.max(0,Math.min(10,S.negligence+delta));}
+
+function rainCascade(S){
+  S.neighborhoods.forEach(n=>{
+    n.foci.filter(f=>f.type==='pupae').forEach(f=>f.type='adults');
+    n.foci.filter(f=>f.type==='larvae').forEach(f=>f.type='pupae');
+    n.foci.filter(f=>f.type==='eggs').forEach(f=>f.type='larvae');
+  });
+  // Add 1 egg to most infested
+  const most=S.neighborhoods.reduce((a,b)=>b.foci.length>a.foci.length?b:a,S.neighborhoods[0]);
+  addFocus(S,most.id,'eggs');
+}
+
+function worstFocus(foci){
+  if(foci.some(f=>f.type==='adults'))return'adults';
+  if(foci.some(f=>f.type==='pupae'))return'pupae';
+  if(foci.some(f=>f.type==='larvae'))return'larvae';
+  if(foci.some(f=>f.type==='eggs'))return'eggs';
+  return'none';
+}
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function log(msg,cls='le-info'){
+  G.log.unshift({msg,cls,id:++G.logId});
+  if(G.log.length>40)G.log.pop();
+  renderLog();
+}
+
+function hasHero(id){return G.selectedHeroes.some(h=>h.id===id);}
+
+function actionCost(base){
+  let c=base;
+  if(G.negligence>=5)c+=1;
+  return c;
+}
+
+// ─────────────────────────────────────────────────────────────
+// DECK
+// ─────────────────────────────────────────────────────────────
+function buildDeck(){
+  const ids=['e1','e2','e3','e4','r1','r2','e5','e6','e7','e8','c1','c2','c3','k1','k2'];
+  const cards=ids.map(id=>EVENT_DEFS.find(e=>e.id===id)).filter(Boolean);
+  return shuffle([...cards,...cards.slice(0,5)]).slice(0,20);
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCREENS
+// ─────────────────────────────────────────────────────────────
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+
+// ─────────────────────────────────────────────────────────────
+// CHAR SELECT
+// ─────────────────────────────────────────────────────────────
+const _selectedHeroes=new Set();
+
+function initCharSelect(){
+  const grid=document.getElementById('char-grid');
+  grid.innerHTML='';
+  HERO_DEFS.forEach(h=>{
+    const d=document.createElement('div');
+    d.className='char-card';
+    d.id='cc-'+h.id;
+    d.innerHTML=`<div class="cc-icon">${h.icon}</div><div class="cc-name">${h.name}</div><div class="cc-role">${h.role}</div><div class="cc-passive">🔵 ${h.passive}</div><div class="cc-active">⭐ ${h.special}</div><div class="cc-weak">⚠️ ${h.weakness}</div>`;
+    d.onclick=()=>toggleHero(h.id);
+    grid.appendChild(d);
+  });
+}
+
+function toggleHero(id){
+  if(_selectedHeroes.has(id)){_selectedHeroes.delete(id);document.getElementById('cc-'+id).classList.remove('chosen');}
+  else if(_selectedHeroes.size<4){_selectedHeroes.add(id);document.getElementById('cc-'+id).classList.add('chosen');}
+  const cnt=_selectedHeroes.size;
+  const el=document.getElementById('char-count');
+  el.textContent=cnt===0?'Nenhum agente selecionado':`${cnt} agente(s) — ${cnt*2} ações por rodada`;
+  document.getElementById('btn-start-game').disabled=cnt<2;
+}
+
+// ─────────────────────────────────────────────────────────────
+// GAME INIT
+// ─────────────────────────────────────────────────────────────
+function startGame(){
+  G.selectedHeroes=HERO_DEFS.filter(h=>_selectedHeroes.has(h.id));
+  G.actionsTotal=G.selectedHeroes.length*2;
+  G.actionsLeft=G.actionsTotal;
+  G.deck=buildDeck();
+
+  // Initial foci
+  addFocus(G,0,'eggs');   // Centro
+  addFocus(G,4,'eggs');   // Favela
+  addFocus(G,1,'larvae'); // Vila Operária
+
+  showScreen('game');
+  buildMapDOM();
+  buildHeroBar();
+  spawnParticles();
+
+  G.phase='idle';
+  log('Missão iniciada. Revele um evento para começar.','le-turn');
+  log('A cidade está em colapso. Cada decisão importa.','le-info');
+  render();
+}
+
+// ─────────────────────────────────────────────────────────────
+// MAP DOM
+// ─────────────────────────────────────────────────────────────
+function buildMapDOM(){
+  const map=document.getElementById('map');
+  map.innerHTML='';
+  G.neighborhoods.forEach(n=>{
+    const d=document.createElement('div');
+    d.className=`neigh ${n.pos}`;
+    d.id=`neigh-${n.id}`;
+    d.onclick=()=>onNeighClick(n.id);
+    map.appendChild(d);
+  });
+}
+
+function buildHeroBar(){
+  const bar=document.getElementById('hero-bar');
+  bar.innerHTML=G.selectedHeroes.map(h=>`<span class="hero-chip" style="border-color:${h.color};color:${h.color};background:${h.color}18">${h.icon} ${h.name}</span>`).join('');
+}
+
+// ─────────────────────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────────────────────
+function render(){renderHUD();renderMap();renderActions();}
+
+function renderHUD(){
+  const {energy,maxEnergy,negligence,round,maxRounds,actionsLeft,phase}=G;
+  document.getElementById('hv-e').textContent=`${energy}⚡`;
+  document.getElementById('bar-e').style.width=`${(energy/maxEnergy)*100}%`;
+  document.getElementById('hv-n').textContent=`${Math.floor(negligence)}/10`;
+  document.getElementById('bar-n').style.width=`${(negligence/10)*100}%`;
+  const negEl=document.getElementById('hv-n');
+  negEl.className=`hstat-val hv-neg${negligence>=7?' warn':''}`;
+  document.getElementById('hv-r').textContent=`${round}/${maxRounds}`;
+  document.getElementById('hv-a').textContent=actionsLeft;
+  const phaseLabels={idle:'Aguardando',event:'Evento',action:'Ação',evolve:'Evoluindo',proliferate:'Proliferação',neg:'Negligência',check:'Verificação'};
+  document.getElementById('hv-phase').textContent=phaseLabels[phase]||phase;
+  document.getElementById('btn-draw').disabled=phase!=='idle'||G.gameOver;
+  document.getElementById('btn-end-turn').disabled=phase!=='action'||G.gameOver;
+}
+
+function renderMap(){
+  G.neighborhoods.forEach(n=>{
+    const el=document.getElementById(`neigh-${n.id}`);
+    if(!el)return;
+    const worst=worstFocus(n.foci);
+    el.className=`neigh ${n.pos} state-${worst}`;
+    if(G.selectedAction&&isValidTarget(n.id))el.classList.add('selected-target');
+
+    const riskLabel={high:'Alto',medium:'Médio',low:'Baixo'}[n.risk]||n.risk;
+    const focusHTML=n.foci.map(f=>{
+      const icons={eggs:'🥚',larvae:'🐛',pupae:'🔵',adults:'🦟'};
+      return `<div class="ficon fi-${f.type}" title="${f.type}">${icons[f.type]||'?'}</div>`;
+    }).join('');
+
+    const badges=[];
+    if(n.ovitraps>0)badges.push(`<span class="nbadge nb-ovi">📡 OVI(${n.ovitraps})</span>`);
+
+    el.innerHTML=`
+      <div class="n-head">
+        <div class="n-icon">${n.icon}</div>
+        <div class="n-info">
+          <div class="n-name">${n.name}</div>
+          <div class="n-risk ${n.risk}">${riskLabel}</div>
+        </div>
+      </div>
+      <div class="n-foci">${focusHTML}</div>
+      ${n.foci.length===0?'<div class="n-clean">✓ Limpo</div>':''}
+      ${badges.length?`<div class="n-badges">${badges.join('')}</div>`:''}
+    `;
+  });
+}
+
+function renderActions(){
+  const list=document.getElementById('actions-list');
+  if(G.phase!=='action'){list.innerHTML='<div style="color:var(--txt3);font-size:.75rem;font-style:italic;padding:.5rem">Aguardando fase de ação...</div>';return;}
+
+  const neg5=G.negligence>=5;
+  const hasGabriel=hasHero('gabriel');
+  const hasTecnico=hasHero('tecnico');
+
+  const ec=base=>{let c=base;if(neg5)c++;return c;};
+  const lc=base=>{let c=base;if(hasTecnico)c=Math.max(1,c-1);if(neg5)c++;return c;};
+
+  const hasFocus=(type)=>G.neighborhoods.some(n=>n.foci.some(f=>f.type===type));
+  const hasAdults=hasFocus('adults');
+  const hasLarvae=hasFocus('larvae');
+  const hasEggs=hasFocus('eggs');
+  const hasPupae=hasFocus('pupae');
+  const hasNoOvi=G.neighborhoods.some(n=>n.ovitraps===0);
+
+  const defs=[
+    {id:'sanear',    label:'🧹 Sanear',         cost:`${ec(1)}⚡, 1ação`,  en:G.energy>=ec(1)&&(hasEggs||hasLarvae), desc:'Remove 1 ovo ou 1 larva'},
+    {id:'larvario',  label:'💧 Larvário',        cost:`${lc(2)}⚡, 1ação`,  en:G.energy>=lc(2)&&hasLarvae,           desc:'Remove 1 larva'},
+    {id:'pupa-solo', label:'🔬 Pupa (solo)',     cost:`${ec(3)}⚡, 1ação`,  en:G.energy>=ec(3)&&hasPupae,            desc:'Remove 1 pupa (mais caro sem apoio)'},
+    {id:'pupa-coop', label:'🤝 Pupa (coop)',     cost:`${ec(2)+ec(2)}⚡, 2ações`,en:G.energy>=(ec(2)+ec(2))&&hasPupae&&G.actionsLeft>=2, desc:'2 agentes removem 1 pupa', coop:true},
+    {id:'fumace',    label:'🚗 Fumacê',          cost:`${Math.max(1,ec(3)-G.flags.fumaceDiscount)}⚡, 2ações`, en:hasAdults&&(hasGabriel?G.energy>=(Math.max(1,ec(3)-G.flags.fumaceDiscount))&&G.actionsLeft>=1:G.energy>=(Math.max(1,ec(3)-G.flags.fumaceDiscount))&&G.actionsLeft>=2),desc:'Remove todos os adultos de 1 bairro',coop:!hasGabriel},
+    {id:'ovitrap',   label:'📡 Ovitrampa',       cost:`${ec(1)}⚡, 1ação`,  en:G.energy>=ec(1)&&hasNoOvi,            desc:'Monitora focos por 3 rodadas'},
+    {id:'protection',label:'🛡 Proteção',        cost:`${ec(1)}⚡, 1ação`,  en:G.energy>=ec(1),                      desc:'Evita perda de energia por adultos'},
+    {id:'mutirao',   label:'🤲 Mutirão',         cost:G.flags.mutiraoFree?'Grátis!':`${ec(3)+(hasHero('lucia')?1:0)}⚡, 2ações`, en:G.flags.mutiraoFree||(G.energy>=(ec(3)+(hasHero('lucia')?1:0))&&G.actionsLeft>=2),desc:'Remove 3 focos (não adultos)',coop:true},
+  ];
+
+  list.innerHTML=defs.map(d=>{
+    const isSel=G.selectedAction===d.id;
+    return `<button class="action-btn${isSel?' selected-act':''}" ${d.en&&G.actionsLeft>0?'':'disabled'} onclick="selectAction('${d.id}')">
+      <div class="ab-row"><span class="ab-name">${d.label}</span><span class="ab-cost">${d.cost}</span></div>
+      <div class="ab-desc">${d.desc}</div>
+      ${d.coop?'<div class="ab-coop">🤝 Cooperativo</div>':''}
+    </button>`;
+  }).join('');
+
+  // Specials
+  const specials=G.selectedHeroes.filter(h=>!G.heroSpecialUsed.has(h.id));
+  if(specials.length){
+    list.innerHTML+=`<div style="font-size:.6rem;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-top:.4rem;padding:0 .1rem">Habilidades Especiais</div>`;
+    specials.forEach(h=>{
+      list.innerHTML+=`<button class="action-btn" onclick="useSpecial('${h.id}')">
+        <div class="ab-row"><span class="ab-name">${h.icon} ${h.name}: Especial</span><span class="ab-cost">1×</span></div>
+        <div class="ab-desc">${h.special.replace(/^[^:]+: /,'')}</div>
+      </button>`;
+    });
+  }
+}
+
+function renderLog(){
+  const el=document.getElementById('log-list');
+  if(!el)return;
+  el.innerHTML=G.log.slice(0,15).map(e=>`<div class="log-entry ${e.cls}">${e.msg}</div>`).join('');
+}
+
+function renderCurrentEvent(card){
+  const typeClass={event:'ect-event',rain:'ect-rain',char:'ect-char',know:'ect-know'};
+  const typeLabel={event:'Evento',rain:'Chuva',char:'Personagem',know:'Conhecimento'};
+  document.getElementById('cur-event').innerHTML=`
+    <div class="ec-type ${typeClass[card.type]||'ect-event'}">${typeLabel[card.type]||card.type}</div>
+    <div class="ec-name">${card.name}</div>
+    <div class="ec-text">${card.effectDesc}</div>
+  `;
+}
+
+// ─────────────────────────────────────────────────────────────
+// ROUND FLOW
+// ─────────────────────────────────────────────────────────────
+function drawEvent(){
+  if(G.phase!=='idle'||G.gameOver)return;
+  if(G.deck.length===0)G.deck=buildDeck();
+  const card=G.deck.shift();
+  G.currentCard=card;
+  G.stats.cardsDrawn++;
+
+  // Show event modal
+  const typeClass={event:'mt-event',rain:'mt-rain',char:'ect-char',know:'mt-know'};
+  const typeLabel={event:'Evento',rain:'Chuva',char:'Personagem',know:'Conhecimento'};
+  document.getElementById('ev-type').className=`modal-type ${typeClass[card.type]||'mt-event'}`;
+  document.getElementById('ev-type').textContent=typeLabel[card.type]||card.type;
+  document.getElementById('ev-name').textContent=card.name;
+  document.getElementById('ev-quote').textContent=card.quote;
+  document.getElementById('ev-effects').innerHTML=`<strong>Efeito:</strong> ${card.effectDesc}`;
+  document.getElementById('ov-event').classList.add('open');
+  G.phase='event';
+  renderHUD();
+}
+
+function applyEventAndClose(){
+  document.getElementById('ov-event').classList.remove('open');
+  const card=G.currentCard;
+  if(!card)return;
+  renderCurrentEvent(card);
+
+  if(card.type==='know'){
+    // Quiz handles phase transition
+    card.apply(G);
+  } else {
+    card.apply(G);
+    G.phase='action';
+    G.actionsLeft=G.actionsTotal;
+    // Apply Gabriel weakness
+    if(hasHero('gabriel')&&G.negligence>=7){G.actionsLeft=Math.max(1,G.actionsLeft-1);log('Gabriel perde 1 ação por negligência alta.','le-warn');}
+    log(`── Turno ${G.round}: fase de ação. ${G.actionsLeft} ações disponíveis.`,'le-turn');
+    render();
+    checkDefeat();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// ACTIONS
+// ─────────────────────────────────────────────────────────────
+function selectAction(id){
+  if(G.phase!=='action'||G.actionsLeft<=0)return;
+  G.selectedAction=G.selectedAction===id?null:id;
+
+  // Actions that don't need target
+  const noTarget=['protection'];
+  if(G.selectedAction&&noTarget.includes(G.selectedAction)){
+    executeNoTargetAction(G.selectedAction);
+    return;
+  }
+
+  const targetInfo=document.getElementById('target-info');
+  if(G.selectedAction){
+    targetInfo.style.display='block';
+  } else {
+    targetInfo.style.display='none';
+  }
+  renderActions();renderMap();
+}
+
+function cancelAction(){
+  G.selectedAction=null;
+  document.getElementById('target-info').style.display='none';
+  renderActions();renderMap();
+}
+
+function executeNoTargetAction(id){
+  G.selectedAction=null;
+  document.getElementById('target-info').style.display='none';
+  const neg5=G.negligence>=5;
+  const ec=b=>{let c=b;if(neg5)c++;return c;};
+
+  if(id==='protection'){
+    changeEnergy(G,-ec(1));G.actionsLeft--;G.stats.actsDone++;
+    // Mark current turn protection (simplified: log it)
+    log('Proteção individual ativa nesta rodada.','le-ok');
+  }
+  render();checkDefeat();
+}
+
+function isValidTarget(id){
+  const n=G.neighborhoods[id];
+  const act=G.selectedAction;
+  if(!act)return false;
+  const hasFocusType=(t)=>n.foci.some(f=>f.type===t);
+  if(act==='sanear')return hasFocusType('eggs')||hasFocusType('larvae');
+  if(act==='larvario')return hasFocusType('larvae');
+  if(act==='pupa-solo')return hasFocusType('pupae');
+  if(act==='pupa-coop')return hasFocusType('pupae');
+  if(act==='fumace')return hasFocusType('adults');
+  if(act==='ovitrap')return n.ovitraps===0;
+  if(act==='mutirao')return n.foci.some(f=>f.type!=='adults');
+  return true;
+}
+
+function onNeighClick(id){
+  if(!G.selectedAction||G.phase!=='action')return;
+  if(!isValidTarget(id)){log('Bairro não é alvo válido para esta ação.','le-warn');return;}
+  executeAction(G.selectedAction,id);
+  G.selectedAction=null;
+  document.getElementById('target-info').style.display='none';
+}
+
+function executeAction(act,id){
+  const n=G.neighborhoods[id];
+  const neg5=G.negligence>=5;
+  const hasTecnico=hasHero('tecnico');
+  const hasGabriel=hasHero('gabriel');
+  const ec=b=>{let c=b;if(neg5)c++;return c;};
+  const lc=b=>{let c=b;if(hasTecnico)c=Math.max(1,c-1);if(neg5)c++;return c;};
+
+  if(act==='sanear'){
+    const cost=ec(1);changeEnergy(G,-cost);G.actionsLeft--;G.stats.actsDone++;
+    const target=n.foci.find(f=>f.type==='eggs')||n.foci.find(f=>f.type==='larvae');
+    if(target){n.foci.splice(n.foci.indexOf(target),1);G.stats.focsElim++;}
+    if(G.flags.saneBonus){changeEnergy(G,1);G.flags.saneBonus=false;log('Bônus de Dona Lúcia: +1⚡.','le-ok');}
+    log(`🧹 Saneado em ${n.name}. (-${cost}⚡)`,'le-ok');
+
+  } else if(act==='larvario'){
+    const cost=lc(2);changeEnergy(G,-cost);G.actionsLeft--;G.stats.actsDone++;
+    const target=n.foci.find(f=>f.type==='larvae');
+    if(target){n.foci.splice(n.foci.indexOf(target),1);G.stats.focsElim++;}
+    log(`💧 Larvário em ${n.name}. (-${cost}⚡)`,'le-ok');
+
+  } else if(act==='pupa-solo'){
+    const cost=ec(3);changeEnergy(G,-cost);G.actionsLeft--;G.stats.actsDone++;
+    const t=n.foci.find(f=>f.type==='pupae');
+    if(t){n.foci.splice(n.foci.indexOf(t),1);G.stats.focsElim++;}
+    log(`🔬 Pupa removida em ${n.name}. (-${cost}⚡)`,'le-ok');
+
+  } else if(act==='pupa-coop'){
+    const cost=ec(2)+ec(2);changeEnergy(G,-cost);G.actionsLeft-=2;G.stats.actsDone+=2;
+    const t=n.foci.find(f=>f.type==='pupae');
+    if(t){n.foci.splice(n.foci.indexOf(t),1);G.stats.focsElim++;}
+    log(`🤝 Pupa cooperativa em ${n.name}. (-${cost}⚡, 2 ações)`,'le-ok');
+
+  } else if(act==='fumace'){
+    const discount=G.flags.fumaceDiscount||0;
+    const baseCost=Math.max(1,ec(3)-discount);
+    const slots=hasGabriel?1:2;
+    changeEnergy(G,-baseCost);G.actionsLeft-=slots;G.stats.actsDone+=slots;G.flags.fumaceDiscount=0;
+    const adults=n.foci.filter(f=>f.type==='adults');
+    adults.forEach(f=>{n.foci.splice(n.foci.indexOf(f),1);G.stats.focsElim++;});
+    log(`🚗 Fumacê em ${n.name}: ${adults.length} adultos eliminados! (-${baseCost}⚡)`,'le-ok');
+
+  } else if(act==='ovitrap'){
+    const cost=ec(1);changeEnergy(G,-cost);G.actionsLeft--;G.stats.actsDone++;
+    n.ovitraps=3;
+    log(`📡 Ovitrampa em ${n.name} (3 rodadas). (-${cost}⚡)`,'le-ok');
+
+  } else if(act==='mutirao'){
+    if(G.flags.mutiraoFree){
+      G.flags.mutiraoFree=false;
+    } else {
+      const cost=ec(3)+(hasHero('lucia')?1:0);changeEnergy(G,-cost);G.actionsLeft-=2;G.stats.actsDone+=2;
+      log(`🤲 Mutirão em ${n.name}. (-${cost}⚡, 2 ações)`,'le-ok');
+    }
+    const removable=n.foci.filter(f=>f.type!=='adults');
+    const toRemove=removable.slice(0,3);
+    toRemove.forEach(f=>{n.foci.splice(n.foci.indexOf(f),1);G.stats.focsElim++;});
+    log(`${toRemove.length} focos removidos por mutirão.`,'le-ok');
+  }
+
+  render();checkDefeat();
+}
+
+function useSpecial(heroId){
+  if(G.heroSpecialUsed.has(heroId)||G.phase!=='action')return;
+  G.heroSpecialUsed.add(heroId);
+
+  if(heroId==='gabriel'){
+    // O Dragão: Fumacê em 2 bairros for 5 energy
+    const adultsNeighs=G.neighborhoods.filter(n=>n.foci.some(f=>f.type==='adults'));
+    if(adultsNeighs.length===0){log('O Dragão: nenhum adulto para combater.','le-warn');G.heroSpecialUsed.delete(heroId);return;}
+    const toFumace=adultsNeighs.slice(0,2);
+    changeEnergy(G,-Math.min(5,G.energy));G.actionsLeft=Math.max(0,G.actionsLeft-1);
+    toFumace.forEach(n=>{n.foci=n.foci.filter(f=>f.type!=='adults');});
+    log(`🐉 O DRAGÃO: Adultos eliminados em ${toFumace.map(n=>n.name).join(' e ')}! (-5⚡)`,'le-ok');
+  } else if(heroId==='lucia'){
+    // Caderno: undo current card (skip effect of next event)
+    G.deck.unshift(G.deck.shift()||G.currentCard);
+    log('📖 Caderno de Dona Lúcia: efeito do próximo evento cancelado.','le-ok');
+  } else if(heroId==='tecnico'){
+    // Ovitrampa em todos os bairros
+    G.neighborhoods.forEach(n=>n.ovitraps=2);
+    log('🔬 Técnico: ovitrampas em todos os bairros (2 rodadas)!','le-ok');
+  } else if(heroId==='agente'){
+    // +4 energy
+    changeEnergy(G,4);
+    log('🧑 Agente: +4⚡ mobilizados pela comunidade!','le-ok');
+  }
+  render();
+}
+
+// ─────────────────────────────────────────────────────────────
+// END TURN → EVOLUTION → PROLIFERATION → NEGLIGENCE
+// ─────────────────────────────────────────────────────────────
+function endTurn(){
+  if(G.phase!=='action'||G.gameOver)return;
+  G.phase='evolve';renderHUD();
+
+  // Step 4+5: must process pupae→adults BEFORE larvae→pupae
+  // so newly-converted pupae don't skip a stage and become adults this same round
+
+  // Step 5 first: existing pupae → adults
+  let adult=0;
+  G.neighborhoods.forEach(n=>{
+    n.foci.filter(f=>f.type==='pupae').forEach(f=>{f.type='adults';adult++;});
+  });
+  if(adult)log(`${adult} pupa(s) viraram mosquitos adultos!`,'le-bad');
+
+  // Step 4 after: larvae → pupae (these will only become adults NEXT round)
+  let evolved=0;
+  G.neighborhoods.forEach(n=>{
+    n.foci.filter(f=>f.type==='larvae').forEach(f=>{f.type='pupae';evolved++;});
+  });
+  if(evolved)log(`${evolved} larva(s) evoluíram para pupas.`,'le-warn');
+
+  // Step 6: proliferation
+  G.phase='proliferate';
+  const highRisk=G.neighborhoods.filter(n=>n.risk==='high');
+  const target=highRisk[G.round%highRisk.length];
+  addFocus(G,target.id,'eggs');
+  log(`Proliferação: 1 ovo em ${target.name}.`,'le-warn');
+
+  // Decrease ovitrap counters
+  G.neighborhoods.forEach(n=>{if(n.ovitraps>0)n.ovitraps--;});
+
+  // Step 7: negligence
+  G.phase='neg';
+  const adultsCount=G.neighborhoods.filter(n=>n.foci.some(f=>f.type==='adults')).length;
+  changeNeg(G,adultsCount);
+  if(adultsCount>0)log(`Negligência +${adultsCount} (${adultsCount} bairro(s) com adultos).`,'le-warn');
+
+  // Adultos in consecutive rounds → spread
+  G.neighborhoods.forEach(n=>{
+    if(n.foci.some(f=>f.type==='adults')){
+      n.adultsInARow=(n.adultsInARow||0)+1;
+      if(n.adultsInARow>=2){
+        const adj=n.adj[Math.floor(Math.random()*n.adj.length)];
+        addFocus(G,adj,'eggs');
+        log(`Adultos em ${n.name} por 2 rodadas: ovos se espalharam!`,'le-bad');
+        n.adultsInARow=0;
+      }
+    } else {
+      n.adultsInARow=0;
+    }
+  });
+
+  // Step 8: check
+  G.phase='check';
+  G.round++;
+  render();
+
+  if(checkDefeat())return;
+  if(checkVictory())return;
+
+  // Next round
+  G.phase='idle';
+  G.flags={saneBonus:false,fumaceDiscount:0,mutiraoFree:false};
+  log(`── Rodada ${G.round} iniciada. Revele um evento. ──`,'le-turn');
+  render();
+}
+
+// ─────────────────────────────────────────────────────────────
+// WIN / LOSE
+// ─────────────────────────────────────────────────────────────
+function checkDefeat(){
+  if(G.gameOver)return false;
+  let reason=null;
+  if(G.energy<=0)reason='O grupo ficou sem energia.';
+  else if(G.negligence>=10)reason='Colapso sanitário: negligência máxima.';
+  else if(G.neighborhoods.filter(n=>n.foci.some(f=>f.type==='adults')).length>=4)reason='4 bairros com mosquitos adultos simultaneamente.';
+  if(reason){showDefeat(reason);return true;}
+  return false;
+}
+
+function checkVictory(){
+  if(G.gameOver)return false;
+  if(G.round>G.maxRounds){showVictory();return true;}
+  return false;
+}
+
+function showVictory(){
+  G.gameOver=true;
+  const s=document.getElementById('screen-end');
+  document.getElementById('end-title').className='end-title v';
+  document.getElementById('end-title').textContent='RESISTÊNCIA';
+  document.getElementById('end-sub').textContent='O SANTUÁRIO SOBREVIVEU';
+  document.getElementById('end-quote').textContent='"Vocês chegaram antes da infestação. Os principais criadouros foram eliminados, e a cidade pode respirar — por enquanto."';
+  document.getElementById('end-effect').innerHTML='<strong>Efeito de Campanha:</strong> Nas próximas missões, o grupo recebe +2⚡ no início de cada rodada, simbolizando resiliência e aprendizado coletivo.';
+  renderEndStats();
+  showScreen('end');
+}
+
+function showDefeat(reason){
+  G.gameOver=true;
+  document.getElementById('end-title').className='end-title d';
+  document.getElementById('end-title').textContent='COLAPSO';
+  document.getElementById('end-sub').textContent=reason.toUpperCase();
+  document.getElementById('end-quote').textContent='"A infestação saiu de controle. A nuvem de mosquitos atinge o Santuário. A derrota não encerra a história, mas deixa marcas."';
+  document.getElementById('end-effect').innerHTML='<strong>Lição:</strong> A negligência cobra seu preço. Ações precoces e cooperativas são a única defesa eficaz.';
+  renderEndStats();
+  showScreen('end');
+}
+
+function renderEndStats(){
+  const s=G.stats;
+  document.getElementById('end-stats').innerHTML=`
+    <div class="estat"><div class="estat-v">${G.round-1}</div><div class="estat-l">Rodadas</div></div>
+    <div class="estat"><div class="estat-v">${s.focsElim}</div><div class="estat-l">Focos Eliminados</div></div>
+    <div class="estat"><div class="estat-v">${s.qCorrect}</div><div class="estat-l">Questões Corretas</div></div>
+    <div class="estat"><div class="estat-v">${G.energy}</div><div class="estat-l">Energia Final</div></div>
+  `;
+}
+
+// ─────────────────────────────────────────────────────────────
+// QUIZ
+// ─────────────────────────────────────────────────────────────
+function openQuiz(S,bonus=false){
+  S.quizBonus=bonus;
+  const available=QUESTIONS.filter((_,i)=>!S.questionsUsed.has(i));
+  if(available.length===0)S.questionsUsed.clear();
+  const pool=QUESTIONS.filter((_,i)=>!S.questionsUsed.has(i));
+  const idx=Math.floor(Math.random()*pool.length);
+  const q=pool[idx];
+  S.questionsUsed.add(QUESTIONS.indexOf(q));
+
+  document.getElementById('qz-q').textContent=q.q;
+  const opts=document.getElementById('qz-opts');
+  opts.innerHTML='';
+  q.opts.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='qopt';
+    btn.textContent=`${String.fromCharCode(65+i)}) ${opt}`;
+    btn.onclick=()=>answerQuiz(i,q,btn,bonus);
+    opts.appendChild(btn);
+  });
+  document.getElementById('qz-fb').className='quiz-fb';
+  document.getElementById('qz-btn').style.display='none';
+  document.getElementById('ov-quiz').classList.add('open');
+}
+
+function answerQuiz(chosen,q,btn,bonus){
+  document.querySelectorAll('.qopt').forEach(b=>b.disabled=true);
+  const correct=chosen===q.c;
+  const fb=document.getElementById('qz-fb');
+  if(correct){
+    btn.classList.add('correct');
+    const reward=bonus?3:2;
+    if(hasHero('lucia'))changeEnergy(G,reward+1); else changeEnergy(G,reward);
+    G.stats.qCorrect++;
+    fb.className='quiz-fb show qfb-ok';
+    fb.innerHTML=`✓ Correto! +${bonus?3:2}⚡${hasHero('lucia')?' +1 (Dona Lúcia)':''}<div style="margin-top:.4rem;font-size:.72rem;color:var(--txt2)">${q.expl}</div>`;
+    log(`📚 Correto! +${bonus?3:2}⚡`,'le-ok');
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.qopt')[q.c].classList.add('correct');
+    changeEnergy(G,-1);
+    G.stats.qWrong++;
+    fb.className='quiz-fb show qfb-bad';
+    if(bonus){
+      // k2: wrong = −1⚡ only (no action loss)
+      fb.innerHTML=`✗ Incorreto. −1⚡.<div style="margin-top:.4rem;font-size:.72rem;color:var(--txt2)">${q.expl}</div>`;
+      log('📚 Incorreto. −1⚡.','le-bad');
+    } else {
+      // k1: wrong = −1⚡ and −1 ação
+      G.actionsLeft=Math.max(0,G.actionsLeft-1);
+      fb.innerHTML=`✗ Incorreto. −1⚡, −1 ação.<div style="margin-top:.4rem;font-size:.72rem;color:var(--txt2)">${q.expl}</div>`;
+      log('📚 Incorreto. −1⚡, −1 ação.','le-bad');
+    }
+  }
+  document.getElementById('qz-btn').style.display='block';
+}
+
+function closeQuizModal(){
+  document.getElementById('ov-quiz').classList.remove('open');
+  G.phase='action';
+  G.actionsLeft=G.actionsTotal;
+  if(hasHero('gabriel')&&G.negligence>=7)G.actionsLeft=Math.max(1,G.actionsLeft-1);
+  log(`Fase de ação: ${G.actionsLeft} ações disponíveis.`,'le-turn');
+  render();checkDefeat();
+}
+
+// ─────────────────────────────────────────────────────────────
+// PARTICLES
+// ─────────────────────────────────────────────────────────────
+function spawnParticles(){
+  for(let i=0;i<10;i++){
+    setTimeout(()=>{
+      const p=document.createElement('div');
+      p.className='mq-particle';
+      p.textContent='🦟';
+      const x=Math.random()*100;const y=100+Math.random()*20;
+      const tx=(Math.random()-.5)*300;const ty=-(150+Math.random()*300);
+      const dur=7+Math.random()*8;
+      p.style.cssText=`left:${x}%;top:${y}%;--tx:${tx}px;--ty:${ty}px;animation-duration:${dur}s;animation-delay:${Math.random()*dur}s`;
+      document.body.appendChild(p);
+    },i*600);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// KEYBOARD
+// ─────────────────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    G.selectedAction=null;
+    document.getElementById('target-info').style.display='none';
+    renderActions();renderMap();
+  }
+  if(e.key==='d'&&G.phase==='idle')drawEvent();
+  if(e.key==='Enter'&&G.phase==='action')endTurn();
+});
+
+// ─────────────────────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────────────────────
+initCharSelect();
+</script>
+</body>
+</html>

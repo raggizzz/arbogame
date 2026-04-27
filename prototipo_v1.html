@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Arboviroses: O Último Santuário — Protótipo V1</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f5f0e8;color:#1a1a1a;line-height:1.6}
+.page{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+h1{font-size:2rem;color:#8b2000;border-bottom:3px solid #8b2000;padding-bottom:.5rem;margin-bottom:.3rem}
+.subtitle{color:#666;font-size:.9rem;margin-bottom:2rem;letter-spacing:2px;text-transform:uppercase}
+h2{font-size:1.2rem;color:#fff;background:#8b2000;padding:.4rem .8rem;border-radius:4px;margin:2rem 0 .75rem;letter-spacing:.5px}
+h3{font-size:1rem;color:#8b2000;margin:1.2rem 0 .4rem;font-weight:700}
+p{margin-bottom:.75rem;font-size:.92rem}
+ul,ol{margin:.4rem 0 .8rem 1.4rem;font-size:.92rem}
+li{margin-bottom:.3rem}
+strong{color:#1a1a1a}
+em{color:#666}
+code{background:#e8e0d0;padding:1px 5px;border-radius:3px;font-size:.85rem;font-family:monospace}
+
+table{width:100%;border-collapse:collapse;margin:.75rem 0;font-size:.85rem}
+th{background:#8b2000;color:#fff;padding:.5rem .75rem;text-align:left}
+td{padding:.45rem .75rem;border-bottom:1px solid #ddd}
+tr:nth-child(even) td{background:#f0ebe0}
+tr:hover td{background:#e8e0d0}
+
+.board-map{background:#1a1a1a;color:#fff;padding:1.2rem;border-radius:8px;font-family:monospace;font-size:.88rem;line-height:2;margin:.75rem 0;text-align:center}
+.board-map .high{color:#ff6b6b}
+.board-map .med{color:#ffd166}
+.board-map .low{color:#6bcb77}
+
+.callout{border-left:4px solid #8b2000;background:#fff8f0;padding:.75rem 1rem;border-radius:0 6px 6px 0;margin:.75rem 0;font-size:.88rem}
+.callout.green{border-color:#22882a;background:#f0fff4}
+.callout.yellow{border-color:#cc8800;background:#fffcf0}
+.callout.blue{border-color:#1a5299;background:#f0f4ff}
+
+.tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:700;letter-spacing:.5px;margin:0 2px}
+.tag-ovo{background:#f0e04050;border:1px solid #c8b000;color:#5a4a00}
+.tag-larva{background:#00c84020;border:1px solid #22882a;color:#155220}
+.tag-pupa{background:#1a529920;border:1px solid #1a5299;color:#0a2850}
+.tag-adulto{background:#cc222220;border:1px solid #cc2222;color:#880000}
+
+.char-card{border:2px solid #8b2000;border-radius:10px;padding:1rem;margin:.5rem 0;background:#fff}
+.char-name{font-size:1rem;font-weight:700;color:#8b2000;margin-bottom:.3rem}
+.char-role{font-size:.75rem;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}
+.char-passive{font-size:.82rem;color:#444;margin-bottom:.25rem}
+.char-active{font-size:.82rem;color:#1a5299;margin-bottom:.25rem}
+.char-weak{font-size:.82rem;color:#cc2222}
+
+.rodada-ex{background:#fff;border:1px solid #ddd;border-radius:8px;padding:1rem;margin:.5rem 0}
+.rodada-header{font-size:.8rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#8b2000;border-bottom:1px solid #eee;padding-bottom:.4rem;margin-bottom:.6rem}
+.fase{font-size:.8rem;font-weight:700;color:#555;margin:.5rem 0 .2rem}
+.fase-detalhe{font-size:.82rem;color:#333;margin-left:.75rem}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
+
+.stat-box{background:#fff;border:1px solid #ddd;border-radius:8px;padding:.75rem;text-align:center}
+.stat-val{font-size:1.5rem;font-weight:900;color:#8b2000}
+.stat-label{font-size:.7rem;color:#888;text-transform:uppercase;letter-spacing:1px}
+
+.recomendado{background:#1a1a1a;color:#fff;border-radius:10px;padding:1.5rem;margin:1rem 0}
+.recomendado h2{background:#8b2000;margin:-1.5rem -1.5rem .75rem;border-radius:10px 10px 0 0;padding:.6rem 1rem}
+.recomendado table th{background:#555}
+.recomendado table td{background:transparent;color:#ddd;border-color:#444}
+.recomendado table tr:nth-child(even) td{background:rgba(255,255,255,.05)}
+
+.problema-item{padding:.4rem .6rem;border-left:3px solid;margin:.3rem 0;font-size:.85rem;border-radius:0 4px 4px 0}
+.p-corte{border-color:#cc2222;background:#fff5f5}
+.p-v2{border-color:#cc8800;background:#fff8f0}
+.p-ambig{border-color:#1a5299;background:#f0f4ff}
+
+@media print{
+  body{background:#fff}
+  .page{padding:1rem}
+  h2{page-break-after:avoid}
+  .rodada-ex,table,p{page-break-inside:avoid}
+}
+@media(max-width:600px){
+  .grid2,.grid3{grid-template-columns:1fr}
+  table{font-size:.75rem}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>Arboviroses: O Último Santuário</h1>
+<div class="subtitle">Documento de Protótipo V1 — Game Design</div>
+
+<!-- ═══════════════════════ 1 ═══════════════════════ -->
+<h2>1. Resumo do Jogo</h2>
+<p>Jogo cooperativo para 2–4 jogadores, duração de 20–40 minutos. O grupo controla agentes de saúde numa cidade em colapso epidêmico. A cada rodada, uma carta de evento piora a situação: surgem ovos, chuvas evoluem o ciclo do mosquito, a negligência sobe. Os jogadores gastam <strong>energia coletiva</strong> para eliminar focos e conter a infestação. Vencem se sobreviverem 10 rodadas sem que a negligência estoure nem o tabuleiro colapse. Perdem se a energia acabar, a negligência chegar a 10 ou quatro bairros caírem simultaneamente para adultos. O conhecimento sobre dengue é recompensado mecanicamente — responder certo restaura energia, responder errado custa ação.</p>
+
+<!-- ═══════════════════════ 2 ═══════════════════════ -->
+<h2>2. Componentes da V1</h2>
+
+<h3>Tabuleiro (1×, imprimir em A3)</h3>
+<ul>
+  <li>5 bairros com conexões visuais entre adjacentes</li>
+  <li>Trilha de Energia — escala de 0 a 15</li>
+  <li>Trilha de Negligência — escala de 0 a 10</li>
+  <li>Trilha de Rodadas — escala de 1 a 10</li>
+  <li>Legenda do ciclo do mosquito impresso no canto</li>
+</ul>
+
+<h3>Marcadores de Foco (35 peças — use cubos coloridos, papéis ou bolinhas)</h3>
+<ul>
+  <li><span class="tag tag-ovo">🟡 AMARELO</span> 15× Ovos</li>
+  <li><span class="tag tag-larva">🟢 VERDE</span> 10× Larvas</li>
+  <li><span class="tag tag-pupa">🔵 AZUL</span> 6× Pupas</li>
+  <li><span class="tag tag-adulto">🔴 VERMELHO</span> 4× Adultos</li>
+</ul>
+
+<h3>Cartas (30 no total)</h3>
+<ul>
+  <li>12 cartas de Evento (baralho principal)</li>
+  <li>8 cartas de Conhecimento (baralho separado)</li>
+  <li>6 cartas de Personagem (misturadas no baralho de eventos)</li>
+  <li>4 cartas reserva (ficam fora na V1)</li>
+</ul>
+
+<h3>Outros componentes</h3>
+<ul>
+  <li>4 fichas de personagem (imprimir em cartão A5, 1 por jogador)</li>
+  <li>4 peões (qualquer peça de outro jogo serve)</li>
+  <li>2 cubos marcadores (1 para energia, 1 para negligência)</li>
+  <li>1 cubo marcador de rodada</li>
+  <li>4 tokens de Ovitrampa (papel quadrado com "OVI" escrito)</li>
+  <li>4 tokens de Proteção Individual (papel circular)</li>
+</ul>
+
+<div class="callout yellow"><strong>Para impressão caseira:</strong> tudo cabe em 6 folhas A4 + 1 folha A3. Marcadores podem ser substituídos por pedaços de papel colorido.</div>
+
+<!-- ═══════════════════════ 3 ═══════════════════════ -->
+<h2>3. Estrutura do Tabuleiro</h2>
+
+<div class="board-map">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="low">[ JARDIM DAS FLORES ]</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(risco baixo)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+<span class="med">[ VILA OPERÁRIA ]</span> ──── <span class="high">[ CENTRO ]</span> ──── <span class="med">[ ESCOLA MUNICIPAL ]</span><br>
+&nbsp;&nbsp;(risco médio)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(risco alto)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(risco médio)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="high">[ FAVELA DO RIO ]</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(risco alto)
+</div>
+
+<h3>Regras do tabuleiro</h3>
+<ul>
+  <li><strong>Adjacência:</strong> jogadores movem-se livremente entre bairros conectados. Movimento não custa energia, mas não custa ação (é parte da ação de Mover).</li>
+  <li><strong>Custo de entrada:</strong> entrar em bairro com adultos custa 2 energia imediatamente, salvo com token de Proteção Individual ativo.</li>
+  <li><strong>Capacidade máxima:</strong> cada bairro comporta até 3 marcadores de foco. Ao receber um 4º, o marcador mais avançado evolui 1 estágio e o excedente é descartado.</li>
+  <li><strong>Slots por bairro:</strong> desenhados no tabuleiro como 3 círculos — facilita contagem visual.</li>
+</ul>
+
+<!-- ═══════════════════════ 4 ═══════════════════════ -->
+<h2>4. Preparação da Partida</h2>
+
+<ol>
+  <li>Coloque o tabuleiro no centro. Todos os bairros começam vazios.</li>
+  <li>Posicione o marcador de energia na posição <strong>12</strong>.</li>
+  <li>Posicione o marcador de negligência na posição <strong>0</strong>.</li>
+  <li>Posicione o marcador de rodada em <strong>1</strong>.</li>
+  <li>Embaralhe as cartas de Evento + Personagem juntas (18 cartas). Embaralhe as cartas de Conhecimento separadamente (8 cartas).</li>
+  <li>Distribua fichas de personagem:
+    <ul>
+      <li>2 jogadores: Gabriel + Dona Lúcia</li>
+      <li>3 jogadores: adiciona Técnico de Saúde</li>
+      <li>4 jogadores: adiciona Agente Comunitário</li>
+    </ul>
+  </li>
+  <li>Todos os jogadores colocam seus peões no <strong>Centro</strong>.</li>
+  <li>Coloque os focos iniciais:
+    <ul>
+      <li>1 ovo <span class="tag tag-ovo">🟡</span> no Centro</li>
+      <li>1 ovo <span class="tag tag-ovo">🟡</span> na Favela do Rio</li>
+      <li>1 larva <span class="tag tag-larva">🟢</span> na Vila Operária</li>
+    </ul>
+  </li>
+  <li>Compre 1 carta do baralho de Evento e deixe-a <em>virada para baixo</em> — é a ameaça da 1ª rodada.</li>
+</ol>
+
+<div class="callout"><strong>Pronto. A partida começa.</strong></div>
+
+<!-- ═══════════════════════ 5 ═══════════════════════ -->
+<h2>5. Sequência de Rodada</h2>
+
+<p>Cada rodada tem 5 fases fixas, nesta ordem:</p>
+
+<table>
+  <tr><th>Fase</th><th>O que acontece</th></tr>
+  <tr>
+    <td><strong>1 — AMEAÇA</strong></td>
+    <td>Vire a carta de Evento do topo. Leia em voz alta. Aplique o efeito imediatamente. Se for carta de Personagem: leia o texto, aplique o bônus e passe para a próxima carta até revelar um Evento real.</td>
+  </tr>
+  <tr>
+    <td><strong>2 — AÇÃO</strong></td>
+    <td>Em qualquer ordem, cada jogador usa suas 2 ações. Discutam livremente. Ações cooperativas podem ser combinadas. A energia é do grupo — todos decidem junto como gastar.</td>
+  </tr>
+  <tr>
+    <td><strong>3 — EVOLUÇÃO</strong></td>
+    <td>Após todas as ações: larvas não tratadas → viram pupas (troque os marcadores). Pupas não tratadas → viram adultos (troque os marcadores). Ovos: só evoluem com carta "Chuva Pesada".</td>
+  </tr>
+  <tr>
+    <td><strong>4 — PROLIFERAÇÃO</strong></td>
+    <td>Adicione 1 ovo em um bairro de risco alto (alterne: rodada ímpar = Centro, rodada par = Favela). Se o bairro estiver cheio (3 marcadores), coloque em bairro adjacente de risco médio.</td>
+  </tr>
+  <tr>
+    <td><strong>5 — NEGLIGÊNCIA</strong></td>
+    <td>Conte quantos bairros têm adultos no tabuleiro. Some esse número ao marcador de negligência. Se negligência ≥ 5: a partir da próxima rodada, todas as ações custam +1 energia.</td>
+  </tr>
+</table>
+
+<p>Avance o marcador de rodada. Verifique vitória/derrota. Se continuar, repita.</p>
+
+<!-- ═══════════════════════ 6 ═══════════════════════ -->
+<h2>6. Ações dos Jogadores</h2>
+
+<p>Cada jogador tem <strong>2 ações por rodada</strong>. Ações gastam energia do pool coletivo. A ordem entre jogadores é livre.</p>
+
+<table>
+  <tr><th>Ação</th><th>Custo energia</th><th>Requisito</th><th>Efeito</th></tr>
+  <tr>
+    <td><strong>Mover</strong></td>
+    <td>0</td>
+    <td>—</td>
+    <td>Move para bairro adjacente. Ao entrar em bairro com adultos: paga 2 energia (sem proteção).</td>
+  </tr>
+  <tr>
+    <td><strong>Sanear</strong></td>
+    <td>1</td>
+    <td>Estar no bairro</td>
+    <td>Remove 1 marcador de ovo <em>ou</em> larva do bairro atual. Kit de Saneamento.</td>
+  </tr>
+  <tr>
+    <td><strong>Tratamento Larvário</strong></td>
+    <td>2</td>
+    <td>Estar no bairro</td>
+    <td>Remove 1 marcador de larva <em>ou</em> pupa. Mais caro, mas único que atua em pupas individualmente.</td>
+  </tr>
+  <tr>
+    <td><strong>Fumacê (UBV)</strong></td>
+    <td>3</td>
+    <td>2+ jogadores no bairro</td>
+    <td>Remove <strong>todos</strong> os adultos do bairro. Efeito temporário: ovos e larvas permanecem.</td>
+  </tr>
+  <tr>
+    <td><strong>Mutirão</strong></td>
+    <td>3</td>
+    <td>2+ jogadores no bairro</td>
+    <td>Remove 3 marcadores quaisquer (exceto adultos) do bairro. Ótimo para limpar acúmulos.</td>
+  </tr>
+  <tr>
+    <td><strong>Instalar Ovitrampa</strong></td>
+    <td>1</td>
+    <td>Estar no bairro</td>
+    <td>Coloque token "OVI" no bairro. Próximas 3 rodadas: novos ovos chegam virados para cima (visíveis) e 1 novo ovo por rodada nesse bairro é automaticamente removido.</td>
+  </tr>
+  <tr>
+    <td><strong>Proteção Individual</strong></td>
+    <td>1</td>
+    <td>Qualquer momento</td>
+    <td>Protege 1 jogador de pagar 2 energia ao entrar em bairro com adultos, até o fim da rodada.</td>
+  </tr>
+  <tr>
+    <td><strong>Carta de Conhecimento</strong></td>
+    <td>0</td>
+    <td>Carta revelada</td>
+    <td>Responda a pergunta em grupo. Acerto: +2 energia. Erro: −1 energia, 1 ação perdida na próxima rodada pelo jogador que respondeu.</td>
+  </tr>
+</table>
+
+<div class="callout blue"><strong>Cooperação em Pupas:</strong> eliminar 1 pupa com Tratamento Larvário requer 2 jogadores no mesmo bairro, cada um gasta 2 energia e 1 ação. <em>Alternativa:</em> 1 jogador sozinho pode gastar 3 energia por 1 pupa (sem cooperação).</div>
+
+<!-- ═══════════════════════ 7 ═══════════════════════ -->
+<h2>7. Sistema dos Focos</h2>
+
+<div class="grid2">
+  <div class="callout">
+    <span class="tag tag-ovo">🟡 OVOS</span><br><br>
+    <strong>Como surgem:</strong> cartas de Evento, proliferação automática.<br><br>
+    <strong>Visibilidade:</strong> bairros de risco alto sem ovitrampa recebem ovos <em>virados para baixo</em> (ocultos). Ovitrampa revela.<br><br>
+    <strong>Remoção:</strong> Sanear (1 energia). Fácil e barato.<br><br>
+    <strong>Evolução:</strong> só evoluem quando a carta "Chuva Pesada" for revelada. No silêncio: ficam esperando.
+  </div>
+  <div class="callout">
+    <span class="tag tag-larva">🟢 LARVAS</span><br><br>
+    <strong>Como surgem:</strong> carta de Evento direto ou ovos que eclodiram (Chuva Pesada).<br><br>
+    <strong>Remoção:</strong> Sanear (1 energia) ou Tratamento Larvário (2 energia).<br><br>
+    <strong>Evolução:</strong> ao fim de <strong>cada rodada</strong> em que não forem removidas → tornam-se pupas automaticamente.
+  </div>
+  <div class="callout">
+    <span class="tag tag-pupa">🔵 PUPAS</span><br><br>
+    <strong>Como surgem:</strong> larvas não tratadas ao fim da rodada.<br><br>
+    <strong>Remoção:</strong> 2 jogadores × 2 energia cada (1 ação cada) <em>ou</em> 1 jogador × 3 energia (1 ação).<br><br>
+    <strong>Evolução:</strong> ao fim da rodada em que não forem removidas → tornam-se adultos <strong>automaticamente</strong>. Não há tolerância.
+  </div>
+  <div class="callout">
+    <span class="tag tag-adulto">🔴 ADULTOS</span><br><br>
+    <strong>Como surgem:</strong> pupas não tratadas ou carta "Chuva Pesada" em cascata.<br><br>
+    <strong>Remoção:</strong> somente Fumacê (3 energia, 2 jogadores no bairro).<br><br>
+    <strong>Penalidade:</strong> entrar no bairro sem proteção = perde 2 energia imediatamente.<br><br>
+    <strong>Propagação:</strong> se um bairro ficar com adultos por 2 rodadas consecutivas → coloque 1 ovo no bairro adjacente de maior risco.
+  </div>
+</div>
+
+<div class="callout yellow"><strong>Regra do limite (3 slots por bairro):</strong> ao chegar o 4º marcador, converta o marcador mais avançado para o estágio seguinte e descarte o excedente. Exemplo: bairro com 2 larvas + 1 pupa recebe nova larva → pupa existente vira adulto, larva extra é descartada.</div>
+
+<!-- ═══════════════════════ 8 ═══════════════════════ -->
+<h2>8. Cartas</h2>
+
+<h3>Baralho de Eventos (12 cartas)</h3>
+<table>
+  <tr><th>Qtd.</th><th>Nome</th><th>Efeito</th></tr>
+  <tr><td>2×</td><td>Ninho Escondido</td><td>Adicione 1 ovo em cada um dos 2 bairros de risco alto (oculto se sem ovitrampa).</td></tr>
+  <tr><td>2×</td><td>Água Parada</td><td>Adicione 1 larva em qualquer bairro que já contenha foco.</td></tr>
+  <tr><td>2×</td><td>Chuva Pesada</td><td><strong>CASCATA:</strong> todos os ovos → larvas; larvas → pupas; pupas → adultos. Depois, adicione 1 ovo novo no bairro mais infestado.</td></tr>
+  <tr><td>1×</td><td>Tempestade</td><td>Chuva Pesada + 1 larva em bairro limpo aleatório.</td></tr>
+  <tr><td>1×</td><td>Descaso Coletivo</td><td>Negligência +2. Se já ≥ 5: nesta rodada também, todas as ações custam +1 energia.</td></tr>
+  <tr><td>1×</td><td>Foco Crítico</td><td>Identifique o bairro com mais marcadores. Adicione 1 marcador do tipo já presente (piora o pior).</td></tr>
+  <tr><td>1×</td><td>Proliferação</td><td>Adicione 1 ovo em <em>todos</em> os bairros de risco alto simultaneamente.</td></tr>
+  <tr><td>1×</td><td>Calmaria</td><td>Nenhum novo foco esta rodada. Recuperem 2 energia coletiva.</td></tr>
+  <tr><td>1×</td><td>Presente para o Mosquito</td><td>Se houver 3+ focos não tratados no tabuleiro: adicione 1 adulto no bairro com maior infestação.</td></tr>
+</table>
+
+<h3>Baralho de Conhecimento (8 cartas — baralho separado)</h3>
+<p>Compradas quando carta de Evento indica "Desafio de Conhecimento". Um jogador lê a pergunta em voz alta; o grupo discute e decide uma resposta.</p>
+
+<table>
+  <tr><th>Pergunta</th><th>Resposta Correta</th><th>Acerto</th><th>Erro</th></tr>
+  <tr><td>Onde o Aedes aegypti deposita seus ovos?</td><td>Nas bordas internas de recipientes, <em>acima</em> da linha d'água</td><td>+2 energia</td><td>−1 energia</td></tr>
+  <tr><td>O que é uma ovitrampa?</td><td>Armadilha de oviposição para monitorar a presença do mosquito</td><td>+2 energia</td><td>−1 energia</td></tr>
+  <tr><td>Que percentual de criadouros está em depósitos de água para consumo (tipo A2)?</td><td>Cerca de 42%</td><td>+3 energia</td><td>−1 energia</td></tr>
+  <tr><td>A partir de qual IIP há risco de surto?</td><td>Acima de 4%</td><td>+2 energia</td><td>−1 energia</td></tr>
+  <tr><td>O fumacê (UBV) elimina os criadouros do mosquito?</td><td>Não — efeito temporário, não elimina criadouros</td><td>+2 energia</td><td>−2 energia</td></tr>
+  <tr><td>Quais doenças o Aedes aegypti transmite?</td><td>Dengue, Zika e Chikungunya</td><td>+2 energia</td><td>−1 energia</td></tr>
+  <tr><td>O que é o método Wolbachia?</td><td>Liberação de mosquitos com bactéria que reduz a transmissão viral</td><td>+3 energia</td><td>−1 energia</td></tr>
+  <tr><td>Ovos do Aedes aegypti sobrevivem à seca?</td><td>Sim — ficam viáveis por meses nas superfícies dos recipientes</td><td>+2 energia</td><td>−1 energia</td></tr>
+</table>
+
+<h3>Cartas de Personagem (6 cartas — misturadas no baralho de Eventos)</h3>
+<p>Quando reveladas, leia o texto em voz alta e aplique o efeito imediatamente. Depois, puxe a próxima carta de Evento para continuar a Fase 1.</p>
+
+<table>
+  <tr><th>Carta</th><th>Efeito</th></tr>
+  <tr><td>Lembrança de Dona Lúcia</td><td>A próxima ação de Saneamento realizada por qualquer jogador recupera 1 energia ao ser executada.</td></tr>
+  <tr><td>Escolha Difícil (Gabriel)</td><td>Gaste 2 energia: remova 1 marcador de qualquer bairro do tabuleiro, sem gastar ação.</td></tr>
+  <tr><td>Olhar Treinado (Dona Lúcia)</td><td>Revele todos os focos ocultos em 1 bairro escolhido pelo grupo.</td></tr>
+  <tr><td>O Dragão Desperta</td><td>O Fumacê custa 2 energia a menos nesta rodada.</td></tr>
+  <tr><td>Legado do Santuário</td><td>Escolha: recuperar 3 energia <em>ou</em> cancelar 1 novo foco desta rodada.</td></tr>
+  <tr><td>Mutirão Espontâneo</td><td>O grupo pode realizar 1 Mutirão gratuito (sem gasto de energia) imediatamente, em qualquer bairro com 2+ jogadores.</td></tr>
+</table>
+
+<!-- ═══════════════════════ 9 ═══════════════════════ -->
+<h2>9. Personagens Jogáveis</h2>
+
+<div class="grid2">
+
+  <div class="char-card">
+    <div class="char-name">Gabriel — O Guardião</div>
+    <div class="char-role">Herói / Linha de Frente</div>
+    <div class="char-passive">🔵 <strong>Passivo:</strong> pode usar Fumacê sozinho por 4 energia (sem precisar de 2ª pessoa).</div>
+    <div class="char-active">⭐ <strong>Especial (1×/partida):</strong> "O Dragão" — Fumacê em 2 bairros adjacentes por 5 energia.</div>
+    <div class="char-weak">⚠️ <strong>Fraqueza:</strong> com negligência ≥ 7, perde 1 ação por rodada até a negligência baixar.</div>
+  </div>
+
+  <div class="char-card">
+    <div class="char-name">Dona Lúcia — A Mentora</div>
+    <div class="char-role">Suporte / Conhecimento</div>
+    <div class="char-passive">🔵 <strong>Passivo:</strong> cartas de Conhecimento reveladas durante a partida dão +1 energia extra no acerto.</div>
+    <div class="char-active">⭐ <strong>Especial (1×/partida):</strong> "Caderno do Conhecimento" — desfaz o efeito de 1 carta de Evento já aplicada nesta rodada.</div>
+    <div class="char-weak">⚠️ <strong>Fraqueza:</strong> Mutirão custa +1 energia quando ela o lidera.</div>
+  </div>
+
+  <div class="char-card">
+    <div class="char-name">Técnico de Saúde — O Especialista</div>
+    <div class="char-role">Controle / Larvas e Pupas</div>
+    <div class="char-passive">🔵 <strong>Passivo:</strong> Tratamento Larvário custa 1 energia a menos (mínimo 1).</div>
+    <div class="char-active">⭐ <strong>Especial (1×/partida):</strong> instala ovitrampa em todos os bairros de graça (duração: 2 rodadas).</div>
+    <div class="char-weak">⚠️ <strong>Fraqueza:</strong> não pode usar Fumacê (restrição de segurança). Delega a outro jogador.</div>
+  </div>
+
+  <div class="char-card">
+    <div class="char-name">Agente Comunitário — O Organizador</div>
+    <div class="char-role">Cooperação / Mobilização</div>
+    <div class="char-passive">🔵 <strong>Passivo:</strong> Mutirão pode ser feito por ele sozinho (sem precisar de 2ª pessoa), ainda custando 3 energia.</div>
+    <div class="char-active">⭐ <strong>Especial (1×/partida):</strong> recupera 4 energia ao grupo sem gastar ação.</div>
+    <div class="char-weak">⚠️ <strong>Fraqueza:</strong> Sanear só funciona se houver outro jogador no mesmo bairro.</div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════ 10 ═══════════════════════ -->
+<h2>10. Vitória e Derrota</h2>
+
+<div class="grid2">
+  <div class="callout green">
+    <strong>✅ VITÓRIA</strong><br><br>
+    O grupo vence ao final da <strong>rodada 10</strong> se:<br><br>
+    • Negligência ≤ 6<br>
+    • Menos de 4 bairros com adultos ativos<br><br>
+    <em>Não precisa ter o tabuleiro limpo. Só precisa ter sobrevivido com controle.</em>
+  </div>
+  <div class="callout">
+    <strong>❌ DERROTA</strong> (qualquer condição abaixo):<br><br>
+    • Energia coletiva chega a 0 em qualquer momento<br>
+    • Negligência atinge 10<br>
+    • 4 bairros têm adultos simultaneamente<br>
+    • Fim da rodada 10 com negligência > 6<br><br>
+    <em>A derrota não encerra a história. Ela ensina.</em>
+  </div>
+</div>
+
+<!-- ═══════════════════════ 11 ═══════════════════════ -->
+<h2>11. Protótipo Mínimo Viável para Playtest</h2>
+
+<table>
+  <tr><th>Item</th><th>V1 (agora)</th></tr>
+  <tr><td>Jogadores</td><td>3 (ideal), funciona com 2 a 4</td></tr>
+  <tr><td>Duração estimada</td><td>25–35 minutos</td></tr>
+  <tr><td>Energia inicial</td><td>12</td></tr>
+  <tr><td>Rodadas</td><td>10</td></tr>
+  <tr><td>Cartas de Evento</td><td>10 (retire "Tempestade" e "Proliferação" no 1º teste)</td></tr>
+  <tr><td>Cartas de Conhecimento</td><td>6 (use as 6 mais simples)</td></tr>
+  <tr><td>Cartas de Personagem</td><td>4 (misturadas nos eventos)</td></tr>
+  <tr><td>Marcadores de foco</td><td>30 (12 ovos, 8 larvas, 6 pupas, 4 adultos)</td></tr>
+  <tr><td>Wolbachia / BRI-Aedes / EDL</td><td>Fora da V1</td></tr>
+  <tr><td>Sistema de sazonalidade formal</td><td>Fora — representado pela carta Chuva Pesada</td></tr>
+  <tr><td>Campanha encadeada</td><td>Fora — missão única por sessão</td></tr>
+</table>
+
+<div class="callout green"><strong>O que entra na V1:</strong> tabuleiro, marcadores coloridos, 20 cartas, 4 personagens, 2 trilhas, regras de 1 página.</div>
+
+<div class="callout yellow"><strong>O que fica para V2:</strong> Wolbachia, BRI-Aedes, Técnica do Inseto Estéril, Aedes albopictus como segundo vetor, sazonalidade formal, campanha encadeada, narrativa completa de abertura, artes finais.</div>
+
+<!-- ═══════════════════════ 12 ═══════════════════════ -->
+<h2>12. Exemplo de 2 Rodadas Completas</h2>
+
+<p><strong>Setup:</strong> 3 jogadores. Gabriel + Dona Lúcia + Técnico. Energia: 12. Negligência: 0. Tabuleiro: 1 ovo (Centro), 1 ovo (Favela), 1 larva (Vila Operária). Todos no Centro.</p>
+
+<div class="rodada-ex">
+  <div class="rodada-header">RODADA 1</div>
+
+  <div class="fase">FASE 1 — AMEAÇA</div>
+  <div class="fase-detalhe">
+    → Carta revelada: <strong>"Água Parada"</strong><br>
+    → Efeito: adicionar 1 larva em bairro com foco existente.<br>
+    → Escolha: Vila Operária (já tem larva) recebe mais 1 larva.<br>
+    → Resultado: Vila Operária com 2 larvas. <em>Situação urgente.</em>
+  </div>
+
+  <div class="fase">FASE 2 — AÇÃO</div>
+  <div class="fase-detalhe">
+    <strong>Grupo discute:</strong> Vila Operária com 2 larvas vai virar 2 pupas se não agir. Prioridade clara.<br><br>
+
+    <strong>Gabriel</strong> (2 ações):<br>
+    — Ação 1: Saneamento no Centro → remove ovo. Energia: 12−1 = <strong>11</strong>.<br>
+    — Ação 2: Move para Vila Operária.<br><br>
+
+    <strong>Dona Lúcia</strong> (2 ações):<br>
+    — Ação 1: Move para Vila Operária.<br>
+    — Ação 2: Tratamento Larvário (cooperativo com Gabriel) → remove 1 larva. Energia: 11−2 = <strong>9</strong>.<br><br>
+
+    <strong>Gabriel</strong> colabora na pupa cooperativa (já usou suas ações? Não — Move e Tratamento eram suas 2 ações, mas ele cooperou com Dona Lúcia na Fase 2 sem gastar ação própria).<br>
+    <em>Correção: em cooperação em pupas, cada um gasta 1 ação + 2 energia. Aqui são larvas, não pupas. Tratamento Larvário em larva = 1 jogador, 2 energia. Sem cooperação obrigatória.</em><br><br>
+
+    <strong>Técnico</strong> (2 ações, na Vila Operária também):<br>
+    — Ação 1: Tratamento Larvário → remove 1 larva restante. Custo reduzido (passiva): 2−1 = 1 energia. Energia: 9−1 = <strong>8</strong>.<br>
+    — Ação 2: Instala Ovitrampa no Centro (volta ao Centro? Não — está na Vila). Instala Ovitrampa na Vila Operária. Energia: 8−1 = <strong>7</strong>.<br><br>
+
+    Favela do Rio: 1 ovo não tratado. Ninguém chegou até lá.
+  </div>
+
+  <div class="fase">FASE 3 — EVOLUÇÃO</div>
+  <div class="fase-detalhe">
+    → Nenhuma larva ou pupa em campo. Sem evolução.
+  </div>
+
+  <div class="fase">FASE 4 — PROLIFERAÇÃO</div>
+  <div class="fase-detalhe">
+    → Rodada 1 (ímpar) → ovo no Centro. Centro: 1 ovo novo.
+  </div>
+
+  <div class="fase">FASE 5 — NEGLIGÊNCIA</div>
+  <div class="fase-detalhe">
+    → 0 bairros com adultos. Negligência: 0 → 0.
+  </div>
+
+  <div style="margin-top:.75rem;padding:.5rem;background:#f0ebe0;border-radius:4px;font-size:.82rem">
+    <strong>Estado ao fim da Rodada 1:</strong> Energia 7 | Negligência 0 | Tabuleiro: 1 ovo (Centro), 1 ovo (Favela), 0 larvas | Ovitrampa na Vila Operária.
+  </div>
+</div>
+
+<div class="rodada-ex">
+  <div class="rodada-header">RODADA 2</div>
+
+  <div class="fase">FASE 1 — AMEAÇA</div>
+  <div class="fase-detalhe">
+    → Carta revelada: <strong>"Chuva Pesada"</strong> ← momento crítico.<br>
+    → CASCATA: ovo (Centro) → larva. Ovo (Favela) → larva.<br>
+    → Efeito extra: 1 ovo novo no bairro mais infestado → empate. Narrador escolhe: Favela.<br>
+    → Resultado: Centro com 1 larva. Favela com 1 larva + 1 ovo.
+  </div>
+
+  <div class="fase">FASE 2 — AÇÃO</div>
+  <div class="fase-detalhe">
+    <strong>Grupo discute:</strong> energia em 7, dois bairros com larvas. Se não tratarem agora, ambas viram pupas. Gabriel ainda está na Vila Operária. Dona Lúcia também.<br><br>
+
+    <strong>Gabriel</strong> (2 ações):<br>
+    — Ação 1: Move para Favela do Rio.<br>
+    — Ação 2: Sanear na Favela → remove ovo. Energia: 7−1 = <strong>6</strong>.<br>
+    <em>(Larva da Favela ainda existe — só removeu o ovo.)</em><br><br>
+
+    <strong>Dona Lúcia</strong> (2 ações):<br>
+    — Ação 1: Move para Centro.<br>
+    — Ação 2: Tratamento Larvário no Centro → remove larva. Energia: 6−2 = <strong>4</strong>.<br><br>
+
+    <strong>Técnico</strong> (2 ações, na Vila Operária):<br>
+    — Ação 1: Move para Favela (junto com Gabriel).<br>
+    — Ação 2: Tratamento Larvário na Favela (passiva: custa 1) → remove larva. Energia: 4−1 = <strong>3</strong>.<br><br>
+
+    Resultado: tudo limpo. Energia: 3. Muito baixa.
+  </div>
+
+  <div class="fase">FASE 3 — EVOLUÇÃO</div>
+  <div class="fase-detalhe">
+    → Nenhuma larva ou pupa em campo. Sem evolução.
+  </div>
+
+  <div class="fase">FASE 4 — PROLIFERAÇÃO</div>
+  <div class="fase-detalhe">
+    → Rodada 2 (par) → ovo na Favela. Favela: 1 ovo.
+  </div>
+
+  <div class="fase">FASE 5 — NEGLIGÊNCIA</div>
+  <div class="fase-detalhe">
+    → 0 bairros com adultos. Negligência: 0 → 0.
+  </div>
+
+  <div style="margin-top:.75rem;padding:.5rem;background:#fff0e8;border-radius:4px;font-size:.82rem;border-left:3px solid #cc4400">
+    <strong>Estado ao fim da Rodada 2:</strong> Energia <strong>3 ← CRÍTICO</strong> | Negligência 0 | Tabuleiro: 1 ovo (Favela) | Ovitrampa ativa na Vila (mais 2 rodadas).<br>
+    <strong>Tensão:</strong> o grupo sobreviveu, mas praticamente sem energia. Se sair "Água Parada" ou outro Evento de foco na Rodada 3, eles terão poucas opções. Precisam de uma carta de Calmaria urgente — ou vão se ver forçados a deixar larvas evoluírem.
+  </div>
+</div>
+
+<!-- ═══════════════════════ 13 ═══════════════════════ -->
+<h2>13. Problemas do Material Original</h2>
+
+<h3>Repetições — cortar sem piedade</h3>
+<div class="problema-item p-corte">Kit de Saneamento é descrito na íntegra pelo menos 4 vezes em seções diferentes. Uma descrição no glossário basta.</div>
+<div class="problema-item p-corte">Custos de energia conflitantes: larvas custam 1 em um trecho, 2 em outro. Padronize: Sanear (ovos/larvas) = 1; Tratamento Larvário (larvas/pupas) = 2.</div>
+<div class="problema-item p-corte">Gabriel e Dona Lúcia são introduzidos e reintroduzidos em 3 seções distintas. Consolide numa ficha única por personagem.</div>
+<div class="problema-item p-corte">A frase "o conhecimento é a verdadeira arma" e variantes aparecem em pelo menos 5 lugares diferentes. Uma vez é impacto. Cinco vezes é ruído.</div>
+
+<h3>Excesso — ficam para V2</h3>
+<div class="problema-item p-v2">Wolbachia: mecânica válida e educativa, mas complexa demais para primeira partida. Exige muita explicação de efeito gradual. V2.</div>
+<div class="problema-item p-v2">BRI-Aedes (borrifação residual): agrega pouco na V1 e tem custo alto de explicação. V2.</div>
+<div class="problema-item p-v2">Aedes albopictus como segundo vetor: fragmenta o foco do jogo. V2.</div>
+<div class="problema-item p-v2">EDL e Técnica do Inseto Estéril: muito específicas, exigem contexto que o playtest ainda não tem. V2.</div>
+<div class="problema-item p-v2">Sistema formal de sazonalidade (seca × chuva com rodadas contadas): simplificado para carta de evento na V1.</div>
+<div class="problema-item p-v2">Campanha encadeada com efeitos entre missões: V2 após o playtest confirmar que o loop básico funciona.</div>
+
+<h3>Ambiguidades — resolvidas aqui</h3>
+<div class="problema-item p-ambig">Focos ocultos nunca explicam como são criados. Resolução V1: bairros de risco alto sem ovitrampa recebem ovos virados para baixo. Ovitrampa revela.</div>
+<div class="problema-item p-ambig">Pupas exigem "2 jogadores" mas sem custo definido. Resolução V1: 2 jogadores × 2 energia × 1 ação cada. Alternativa solo: 3 energia, 1 ação.</div>
+<div class="problema-item p-ambig">Medidor de Negligência tem efeitos conflitantes em seções diferentes. Resolução V1: ≥ 5 = +1 em todos os custos de ação. Simples e único.</div>
+<div class="problema-item p-ambig">Movimento nunca foi definido. Resolução V1: livre, custo 0 em energia, 1 ação usada. Penalidade ao entrar em área com adultos.</div>
+<div class="problema-item p-ambig">Ação e energia parecem intercambiáveis no material. Resolução V1: ação = slot por jogador (2/rodada); energia = recurso coletivo numérico. São coisas diferentes.</div>
+<div class="problema-item p-ambig">IIP como percentual não traduz para linguagem de jogo. Resolução V1: semáforo no medidor de negligência (verde 0–4, amarelo 5–7, vermelho 8–10).</div>
+
+<h3>Elementos que confundem</h3>
+<div class="problema-item p-corte">Referências bibliográficas (ABNT) dentro das seções de mecânica. Isso é tese acadêmica, não documento de regras. Corte total do rulebook.</div>
+<div class="problema-item p-corte">Texto sobre Teoria dos Jogos e Jogos Evolucionários. Não pertence ao manual do jogador. Talvez contexto de design — não de jogo.</div>
+
+<!-- ═══════════════════════ RECOMENDADO ═══════════════════════ -->
+<div class="recomendado">
+  <h2>Versão Recomendada para o Primeiro Teste</h2>
+
+  <table>
+    <tr><th>Configuração</th><th>Valor</th></tr>
+    <tr><td>Número de jogadores</td><td>3</td></tr>
+    <tr><td>Personagens</td><td>Gabriel + Dona Lúcia + Técnico de Saúde</td></tr>
+    <tr><td>Energia inicial</td><td>12</td></tr>
+    <tr><td>Rodadas</td><td>10</td></tr>
+    <tr><td>Cartas de Evento no deck</td><td>10 (sem Tempestade e Proliferação)</td></tr>
+    <tr><td>Cartas de Conhecimento</td><td>5 (as mais simples)</td></tr>
+    <tr><td>Cartas de Personagem</td><td>4 (misturadas nos eventos)</td></tr>
+    <tr><td>Focos iniciais</td><td>1 ovo Centro, 1 ovo Favela, 1 larva Vila Operária</td></tr>
+    <tr><td>Wolbachia / BRI / EDL</td><td>Fora</td></tr>
+    <tr><td>Negligência penaliza</td><td>Sim (≥5 = +1 energia em custos)</td></tr>
+    <tr><td>Focos ocultos</td><td>Sim, mas só nos 2 bairros de risco alto</td></tr>
+  </table>
+
+  <p style="margin-top:1rem;color:#ccc;font-size:.88rem"><strong style="color:#fff">O que observar no playtest:</strong></p>
+  <ul style="color:#ccc;font-size:.85rem;margin:.5rem 0 0 1.2rem">
+    <li>A energia acaba rápido demais ou sobra? → Se acaba sempre antes da rodada 5, aumente para 14.</li>
+    <li>Pupas cooperativas são interessantes ou só frustrantes? → Se só frustrantes, simplifique para 1 jogador, 3 energia.</li>
+    <li>As cartas de Conhecimento interrompem bem o ritmo ou travam o jogo? → Se travam, reduza para 3 cartas e perguntas curtas.</li>
+    <li>A cascata de Chuva Pesada gera tensão ou derrota instantânea? → Se mata o grupo, reduza para: só ovos evoluem, larvas e pupas ficam.</li>
+    <li>Os personagens parecem distintos? → Se intercambiáveis, reforce as fraquezas.</li>
+  </ul>
+
+  <p style="margin-top:1rem;color:#e8a020;font-size:.88rem;font-style:italic"><strong>Meta do 1º playtest:</strong> não é ganhar. É descobrir onde o jogo trava, onde flui, o que os jogadores debatem. Toda discussão entre jogadores sobre o que fazer é o jogo funcionando.</p>
+</div>
+
+<div style="text-align:center;margin-top:2rem;padding:1rem;border-top:1px solid #ddd;font-size:.75rem;color:#888">
+  Arboviroses: O Último Santuário — Protótipo V1 · Documento de Game Design
+</div>
+
+</div>
+</body>
+</html>
