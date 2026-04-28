@@ -1,162 +1,134 @@
 import { motion } from 'framer-motion';
-import { ArrowLeft, Dice1, HelpCircle, Award, Users } from 'lucide-react';
+import { ArrowLeft, Award, Dice5, Droplets, HelpCircle, ShieldCheck, Sparkles, Trophy } from 'lucide-react';
 import useGameStore from '../store/gameStore';
+
+const rules = [
+  {
+    icon: Dice5,
+    title: 'Role o dado',
+    description: 'Clique no dado para mover seu peao. Se tirar 6, voce joga novamente.',
+    tone: 'bg-secondary-500'
+  },
+  {
+    icon: Droplets,
+    title: 'Evite criadouros',
+    description: 'Casas de agua parada podem fazer voce voltar algumas posicoes.',
+    tone: 'bg-danger-500'
+  },
+  {
+    icon: Sparkles,
+    title: 'Aproveite o mutirao',
+    description: 'Casas positivas ajudam sua equipe a avancar pelo tabuleiro.',
+    tone: 'bg-primary-600'
+  },
+  {
+    icon: HelpCircle,
+    title: 'Responda quizzes',
+    description: 'Perguntas corretas somam pontos e reforcam dicas de prevencao.',
+    tone: 'bg-accent-500'
+  },
+  {
+    icon: Trophy,
+    title: 'Chegue ao fim',
+    description: 'Vence quem levar os peoes ao final com boa estrategia.',
+    tone: 'bg-emerald-950'
+  }
+];
+
+const tips = [
+  'Leia cada pergunta com calma antes de responder.',
+  'Use o turno extra do 6 para colocar mais peoes em jogo.',
+  'Compare a pontuacao no ranking depois da partida.',
+  'No multiplayer, aguarde sua vez para jogar o dado.',
+  'Convide amigos para aprenderem juntos.'
+];
 
 const HowToPlay = () => {
   const { setGameState } = useGameStore();
-  
-  const rules = [
-    {
-      icon: '🎲',
-      title: 'Role o Dado',
-      description: 'Clique no botão "Rolar Dado" para mover seu peão pelo tabuleiro.',
-      color: 'from-dengue-blue to-blue-400'
-    },
-    {
-      icon: '💧',
-      title: 'Casa do Criadouro',
-      description: 'Ops! Você encontrou água parada. Volte 3 casas e aprenda a evitar!',
-      color: 'from-red-400 to-red-500'
-    },
-    {
-      icon: '💪',
-      title: 'Mutirão de Limpeza',
-      description: 'Parabéns! Você ajudou a limpar. Avance 2 casas!',
-      color: 'from-dengue-green to-green-500'
-    },
-    {
-      icon: '❓',
-      title: 'Casa do Quiz',
-      description: 'Responda perguntas sobre dengue e ganhe +10 pontos por acerto!',
-      color: 'from-dengue-yellow to-yellow-500'
-    },
-    {
-      icon: '🏆',
-      title: 'Chegue ao Fim',
-      description: 'Seja o primeiro a chegar na casa final e vença o jogo!',
-      color: 'from-dengue-purple to-purple-500'
-    }
-  ];
-  
-  const tips = [
-    '💡 Leia as curiosidades após cada pergunta para aprender mais!',
-    '🎯 Quanto mais perguntas acertar, maior sua pontuação!',
-    '🏫 Jogue com amigos e compare resultados!',
-    '📊 Seu progresso é salvo automaticamente!',
-    '🌟 Compartilhe seu certificado nas redes sociais!'
-  ];
-  
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dengue-blue via-blue-400 to-dengue-green p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Cabeçalho */}
-        <motion.div
-          className="text-center mb-8"
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+    <main className="screen-shell">
+      <div className="page-container py-6 sm:py-10">
+        <button
+          onClick={() => setGameState('menu')}
+          className="mb-6 inline-flex h-11 w-11 items-center justify-center rounded-2xl action-secondary"
+          aria-label="Voltar ao menu"
         >
-          <button
-            onClick={() => setGameState('menu')}
-            className="absolute top-4 left-4 p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-all"
-          >
-            <ArrowLeft className="w-6 h-6 text-gray-600" />
-          </button>
-          
-          <motion.div
-            className="text-8xl mb-4"
-            animate={{
-              rotate: [0, 10, -10, 0]
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity
-            }}
-          >
-            📖
-          </motion.div>
-          
-          <h1 className="text-6xl font-bold text-white drop-shadow-2xl mb-2">
-            COMO JOGAR
-          </h1>
-          <p className="text-xl text-white drop-shadow-lg">
-            Aprenda as regras do jogo!
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+
+        <motion.header
+          className="mb-8"
+          initial={{ opacity: 0, y: -16 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="icon-badge mb-4 h-14 w-14">
+            <Dice5 className="h-8 w-8" />
+          </div>
+          <h1 className="brand-title text-4xl font-black leading-tight sm:text-6xl">Como jogar</h1>
+          <p className="brand-copy mt-3 max-w-2xl text-lg font-semibold">
+            O ArboGame mistura regras de Ludo com desafios de prevencao contra a dengue.
           </p>
-        </motion.div>
-        
-        {/* Regras */}
-        <motion.div
-          className="space-y-4 mb-8"
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-        >
-          {rules.map((rule, index) => (
-            <motion.div
-              key={index}
-              className="bg-white rounded-3xl p-6 shadow-xl"
-              initial={{ x: -50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ scale: 1.02, x: 5 }}
-            >
-              <div className="flex items-start gap-4">
-                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${rule.color} flex items-center justify-center text-4xl flex-shrink-0`}>
-                  {rule.icon}
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                    {rule.title}
-                  </h3>
-                  <p className="text-gray-600 text-lg">
-                    {rule.description}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-        
-        {/* Dicas */}
-        <motion.div
-          className="bg-white rounded-3xl p-8 shadow-xl mb-8"
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-            <Award className="w-8 h-8 text-dengue-yellow" />
-            Dicas Importantes
-          </h2>
-          
-          <div className="space-y-3">
-            {tips.map((tip, index) => (
+        </motion.header>
+
+        <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="grid gap-3">
+            {rules.map((rule, index) => (
               <motion.div
-                key={index}
-                className="flex items-start gap-3 p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl"
-                initial={{ x: -30, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.6 + index * 0.1 }}
+                key={rule.title}
+                className="surface-panel grid grid-cols-[auto_1fr] gap-4 rounded-[1.5rem] p-4 sm:p-5"
+                initial={{ opacity: 0, x: -18 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 }}
               >
-                <div className="text-2xl">{tip.split(' ')[0]}</div>
-                <p className="text-gray-700 flex-1">{tip.substring(3)}</p>
+                <div className={`flex h-14 w-14 items-center justify-center rounded-2xl text-white ${rule.tone}`}>
+                  <rule.icon className="h-7 w-7" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-emerald-950">{rule.title}</h2>
+                  <p className="mt-1 font-medium leading-6 text-emerald-900/62">{rule.description}</p>
+                </div>
               </motion.div>
             ))}
           </div>
-        </motion.div>
-        
-        {/* Botão Jogar */}
-        <motion.button
-          onClick={() => setGameState('login')}
-          className="w-full bg-gradient-to-r from-dengue-green to-green-500 text-white font-bold py-6 rounded-3xl shadow-2xl hover:shadow-3xl transition-all text-2xl"
-          whileHover={{ scale: 1.02, y: -2 }}
-          whileTap={{ scale: 0.98 }}
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 1 }}
-        >
-          🎮 COMEÇAR A JOGAR!
-        </motion.button>
+
+          <motion.aside
+            className="surface-panel rounded-[2rem] p-5 sm:p-6"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+          >
+            <div className="mb-5 flex items-center gap-3">
+              <div className="icon-badge h-12 w-12">
+                <Award className="h-6 w-6" />
+              </div>
+              <h2 className="text-2xl font-black text-emerald-950">Dicas rapidas</h2>
+            </div>
+
+            <div className="grid gap-3">
+              {tips.map((tip, index) => (
+                <div key={tip} className="flex gap-3 rounded-2xl bg-white/70 p-4 ring-1 ring-emerald-900/8">
+                  <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-primary-100 text-sm font-black text-primary-700">
+                    {index + 1}
+                  </span>
+                  <p className="font-semibold leading-6 text-emerald-900/70">{tip}</p>
+                </div>
+              ))}
+            </div>
+
+            <motion.button
+              onClick={() => setGameState('login')}
+              className="mt-5 inline-flex min-h-[58px] w-full items-center justify-center gap-2 rounded-2xl px-5 font-black action-primary"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <ShieldCheck className="h-5 w-5" />
+              Comecar partida
+            </motion.button>
+          </motion.aside>
+        </section>
       </div>
-    </div>
+    </main>
   );
 };
 

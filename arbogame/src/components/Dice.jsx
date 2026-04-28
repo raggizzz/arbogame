@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Dices } from 'lucide-react';
 import useGameStore from '../store/gameStore';
 
 const Dice = () => {
@@ -15,8 +16,7 @@ const Dice = () => {
   const currentPlayer = players[currentPlayerIndex];
   const isLocalTurn = !isOnlineMultiplayer || currentPlayer?.id === localPlayerId;
   const canInteract = canRoll && !isRolling && isLocalTurn;
-  
-  // Faces do dado
+
   const diceFaces = {
     1: [[1, 1]],
     2: [[0, 0], [2, 2]],
@@ -25,39 +25,37 @@ const Dice = () => {
     5: [[0, 0], [0, 2], [1, 1], [2, 0], [2, 2]],
     6: [[0, 0], [0, 2], [1, 0], [1, 2], [2, 0], [2, 2]]
   };
-  
+
   const dots = diceFaces[diceValue] || diceFaces[1];
-  
+
   return (
-    <div className="flex flex-col items-center gap-6 w-full">
-      {/* Informação do jogador atual */}
+    <div className="flex w-full flex-col items-center gap-5">
       {currentPlayer && (
         <motion.div
-          className="text-center w-full"
-          initial={{ opacity: 0, y: -20 }}
+          className="w-full text-center"
+          initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="text-xs font-semibold text-white/60 mb-2 uppercase tracking-wider">
-            Vez de:
-          </div>
+          <div className="mb-2 text-xs font-black uppercase text-white/45">Vez de</div>
           <div
-            className="text-lg font-bold px-6 py-3 rounded-2xl text-white shadow-lg border-2 border-white/20"
+            className="rounded-2xl px-4 py-3 text-base font-black text-white shadow-lg ring-1 ring-white/20"
             style={{ backgroundColor: currentPlayer.color }}
           >
             {currentPlayer.name}
           </div>
         </motion.div>
       )}
-      
-      {/* Dado */}
-      <motion.div
-        className="relative cursor-pointer"
-        whileHover={canInteract ? { scale: 1.1 } : {}}
+
+      <motion.button
+        className={`relative ${canInteract ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'}`}
+        whileHover={canInteract ? { scale: 1.06 } : {}}
         whileTap={canInteract ? { scale: 0.95 } : {}}
         onClick={() => canInteract && rollDice()}
+        disabled={!canInteract}
+        aria-label="Rolar dado"
       >
         <motion.div
-          className="w-32 h-32 bg-white rounded-3xl shadow-2xl border-4 border-primary-500/50 relative"
+          className="relative h-28 w-28 rounded-[1.75rem] border border-emerald-900/10 bg-white shadow-2xl sm:h-32 sm:w-32"
           animate={isRolling ? {
             rotateX: [0, 360, 720, 1080],
             rotateY: [0, 360, 720, 1080],
@@ -68,51 +66,47 @@ const Dice = () => {
             ease: 'easeOut'
           } : {}}
         >
-          {/* Grid 3x3 para os pontos */}
-          <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-2 p-3">
+          <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-2 p-4">
             {Array.from({ length: 9 }).map((_, index) => {
               const row = Math.floor(index / 3);
               const col = index % 3;
               const hasDot = dots.some(([r, c]) => r === row && c === col);
-              
+
               return (
                 <motion.div
                   key={index}
-                  className={`rounded-full ${hasDot ? 'bg-red-500' : 'bg-transparent'}`}
+                  className={`rounded-full ${hasDot ? 'bg-emerald-950' : 'bg-transparent'}`}
                   initial={{ scale: 0 }}
                   animate={{ scale: hasDot ? 1 : 0 }}
-                  transition={{ delay: hasDot ? 0.1 : 0 }}
+                  transition={{ delay: hasDot ? 0.08 : 0 }}
                 />
               );
             })}
           </div>
         </motion.div>
-        
-        {/* Sombra do dado */}
-        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-20 h-4 bg-black opacity-20 rounded-full blur-md" />
-      </motion.div>
-      
-      {/* Botão de rolar */}
+        <div className="absolute -bottom-2 left-1/2 h-4 w-20 -translate-x-1/2 rounded-full bg-black/25 blur-md" />
+      </motion.button>
+
       <motion.button
-        className={`w-full px-8 py-4 rounded-2xl font-bold text-white shadow-lg transition-all ${
+        className={`inline-flex min-h-[54px] w-full items-center justify-center gap-2 rounded-2xl px-5 font-black transition ${
           canInteract
-            ? 'bg-gradient-to-r from-primary-500 to-primary-600 shadow-glow hover:shadow-glow-lg'
-            : 'bg-dark-600 cursor-not-allowed opacity-50'
+            ? 'action-primary'
+            : 'cursor-not-allowed bg-white/10 text-white/45'
         }`}
         onClick={() => canInteract && rollDice()}
         disabled={!canInteract}
         whileHover={canInteract ? { scale: 1.02 } : {}}
         whileTap={canInteract ? { scale: 0.98 } : {}}
       >
-        {isRolling ? '🎲 Rolando...' : isLocalTurn ? '🎲 Rolar Dado' : 'Aguardando vez'}
+        <Dices className="h-5 w-5" />
+        {isRolling ? 'Rolando...' : isLocalTurn ? 'Rolar dado' : 'Aguardando vez'}
       </motion.button>
-      
-      {/* Valor do dado */}
+
       {!isRolling && (
         <motion.div
-          className="text-5xl font-black gradient-text"
+          className="rounded-2xl bg-white/10 px-5 py-2 text-4xl font-black text-white"
           key={diceValue}
-          initial={{ scale: 0, rotate: -180 }}
+          initial={{ scale: 0, rotate: -120 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: 'spring', stiffness: 300 }}
         >

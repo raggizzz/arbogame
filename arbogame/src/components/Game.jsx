@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Pause, Play, Home, Trophy, CheckCircle, XCircle, TrendingUp, Users, Activity } from 'lucide-react';
+import { Activity, CheckCircle, Home, Pause, Play, Trophy, TrendingUp, Users, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import useGameStore from '../store/gameStore';
 import { leaveRoom, subscribeToRoom } from '../firebase/multiplayerService';
@@ -47,7 +47,7 @@ const Game = () => {
   }, [applyOnlineRoomState, isOnlineMultiplayer, multiplayerRoomId, resetGame, setGameState]);
 
   const handleQuit = () => {
-    if (window.confirm('Deseja realmente sair? Seu progresso será perdido.')) {
+    if (window.confirm('Deseja realmente sair? Seu progresso sera perdido.')) {
       if (isOnlineMultiplayer && multiplayerRoomId && localPlayerId) {
         leaveRoom(multiplayerRoomId, localPlayerId).catch((error) => {
           console.error('Erro ao sair da sala online:', error);
@@ -59,244 +59,225 @@ const Game = () => {
   };
 
   return (
-    <div className="relative w-full min-h-screen bg-gradient-to-br from-gray-900 via-emerald-900 to-gray-900 overflow-x-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-mesh-gradient opacity-5" />
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-20" />
+    <main className="screen-shell-dark">
+      <div className="relative z-10 min-h-screen p-3 pb-28 sm:p-4 lg:grid lg:grid-cols-[240px_minmax(0,1fr)_300px] lg:gap-4 lg:p-5 lg:pb-5">
+        <MobileTopBar score={score} correctAnswers={correctAnswers} wrongAnswers={wrongAnswers} />
 
-      {/* Layout Responsivo Premium */}
-      <div className="relative h-full min-h-screen flex flex-col lg:grid lg:grid-cols-12 gap-3 sm:gap-4 p-3 sm:p-4 lg:p-6 pb-28 lg:pb-6">
+        <aside className="hidden min-w-0 flex-col gap-4 lg:flex">
+          <ScorePanel score={score} correctAnswers={correctAnswers} wrongAnswers={wrongAnswers} accuracy={accuracy} />
+          <ControlPanel isPaused={isPaused} onPause={handlePause} onQuit={handleQuit} />
+        </aside>
 
-        {/* HEADER MOBILE - Barra Superior Compacta */}
-        <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-emerald-900/95 via-emerald-800/95 to-emerald-900/95 backdrop-blur-md border-b border-emerald-700/50 shadow-lg">
-          <div className="flex items-center justify-between px-4 py-2.5">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center shadow-md">
-                <Trophy className="w-4 h-4 text-white" />
-              </div>
-              <div>
-                <div className="text-xs text-emerald-200">Pontuação</div>
-                <div className="text-lg font-black text-white">{score}</div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 text-xs text-emerald-100">
-              <span className="flex items-center gap-1">
-                <CheckCircle className="w-3 h-3 text-primary-400" />
-                {correctAnswers}
-              </span>
-              <span className="flex items-center gap-1">
-                <XCircle className="w-3 h-3 text-red-400" />
-                {wrongAnswers}
-              </span>
-            </div>
+        <section className="flex min-w-0 items-center justify-center pt-16 lg:pt-0">
+          <div className="w-full max-w-[min(92vh,900px)]">
+            <BoardLudoGrid />
           </div>
-        </div>
+        </section>
 
-        {/* Espaçamento para header mobile */}
-        <div className="lg:hidden h-12" />
+        <aside className="mt-4 flex min-w-0 flex-col gap-4 lg:mt-0">
+          <PlayersPanel players={players} currentPlayerIndex={currentPlayerIndex} />
+          <DicePanel />
+        </aside>
 
-        {/* SIDEBAR DESKTOP - Esquerda */}
-        <div className="hidden lg:flex lg:col-span-2 flex-col gap-4">
-          <motion.div
-            className="glass-dark rounded-2xl p-5 shadow-2xl border border-emerald-500/20"
-            initial={{ x: -50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-          >
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-glow">
-                <Trophy className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <div className="text-xs text-emerald-300 font-semibold uppercase tracking-wide">Pontos</div>
-                <div className="text-3xl font-black text-white">{score}</div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm bg-emerald-950/50 p-2 rounded-lg">
-                <CheckCircle className="w-4 h-4 text-primary-400 flex-shrink-0" />
-                <span className="text-emerald-200">Acertos:</span>
-                <strong className="text-white ml-auto">{correctAnswers}</strong>
-              </div>
-              <div className="flex items-center gap-2 text-sm bg-emerald-950/50 p-2 rounded-lg">
-                <XCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
-                <span className="text-emerald-200">Erros:</span>
-                <strong className="text-white ml-auto">{wrongAnswers}</strong>
-              </div>
-              <div className="flex items-center gap-2 text-sm bg-emerald-950/50 p-2 rounded-lg">
-                <TrendingUp className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                <span className="text-emerald-200">Precisão:</span>
-                <strong className="text-white ml-auto">{accuracy}%</strong>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Controles Desktop */}
-          <motion.div
-            className="glass-dark rounded-2xl p-4 flex flex-col gap-3 border border-emerald-500/20"
-            initial={{ x: -50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.1 }}
-          >
-            <motion.button
-              onClick={handlePause}
-              className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white font-bold py-3 rounded-xl shadow-glow hover:shadow-glow-lg transition-all flex items-center justify-center gap-2"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              {isPaused ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
-              {isPaused ? 'Continuar' : 'Pausar'}
-            </motion.button>
-
-            <motion.button
-              onClick={handleQuit}
-              className="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Home className="w-5 h-5" />
-              Sair
-            </motion.button>
-          </motion.div>
-        </div>
-
-        {/* TABULEIRO - Centro */}
-        <div className="flex-1 lg:col-span-7 flex items-center justify-center min-w-0">
-          <BoardLudoGrid />
-        </div>
-
-        {/* SIDEBAR DIREITA - Jogadores e Dado */}
-        <div className="lg:col-span-3 flex flex-col gap-3 sm:gap-4 min-w-0">
-
-          {/* Jogadores */}
-          <motion.div
-            className="glass-dark rounded-2xl p-4 sm:p-5 shadow-2xl border border-emerald-500/20"
-            initial={{ x: 50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <Users className="w-5 h-5 text-primary-400" />
-              <div className="text-sm font-bold text-white uppercase tracking-wide">Jogadores</div>
-            </div>
-
-            <div className="space-y-3">
-              {players.map((player, index) => {
-                const finishedCount = player.pawns?.filter(p => p.finished).length || 0;
-                const inPlayCount = player.pawns?.filter(p => p.location !== 'base' && !p.finished).length || 0;
-                const isCurrentPlayer = index === currentPlayerIndex;
-
-                return (
-                  <motion.div
-                    key={player.id}
-                    className={`flex items-center gap-3 p-3 rounded-xl transition-all ${isCurrentPlayer
-                        ? 'bg-primary-500/20 border-2 border-primary-500'
-                        : 'bg-emerald-950/30 border border-emerald-800/30'
-                      }`}
-                    initial={{ x: 50, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <div
-                      className="w-10 h-10 rounded-xl border-2 border-white/20 shadow-lg flex items-center justify-center text-white font-bold relative"
-                      style={{ backgroundColor: player.color }}
-                    >
-                      {player.name.charAt(0)}
-                      {isCurrentPlayer && (
-                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary-400 rounded-full border-2 border-white animate-pulse" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-white truncate">
-                        {player.name}
-                      </div>
-                      <div className="text-xs text-emerald-300 flex items-center gap-2">
-                        <span>🏠{4 - inPlayCount - finishedCount}</span>
-                        <span>🎮{inPlayCount}</span>
-                        <span>🏆{finishedCount}</span>
-                      </div>
-                    </div>
-                    <div className="text-sm font-bold text-primary-400">
-                      {player.score}
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </motion.div>
-
-          {/* Dado */}
-          <motion.div
-            className="glass-dark rounded-2xl p-5 flex flex-col items-center justify-center shadow-2xl border border-emerald-500/20"
-            initial={{ x: 50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.1 }}
-          >
-            <div className="flex items-center gap-2 mb-3 text-emerald-300 text-sm font-semibold">
-              <Activity className="w-4 h-4" />
-              <span>Lançar Dado</span>
-            </div>
-            <Dice />
-          </motion.div>
-        </div>
-
-        {/* CONTROLES MOBILE - Bottom Fixed */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-emerald-900/95 via-emerald-800/95 to-transparent backdrop-blur-md border-t border-emerald-700/50 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-          <div className="flex gap-3">
-            <motion.button
-              onClick={handlePause}
-              className="flex-1 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-bold py-3 rounded-xl shadow-xl flex items-center justify-center gap-2"
-              whileTap={{ scale: 0.95 }}
-            >
-              {isPaused ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
-              <span>{isPaused ? 'Continuar' : 'Pausar'}</span>
-            </motion.button>
-
-            <motion.button
-              onClick={handleQuit}
-              className="bg-gray-700 text-white font-bold py-3 px-6 rounded-xl shadow-xl flex items-center justify-center"
-              whileTap={{ scale: 0.95 }}
-            >
-              <Home className="w-5 h-5" />
-            </motion.button>
-          </div>
-        </div>
-
-        {/* Espaçamento para controles mobile */}
-        <div className="lg:hidden h-20" />
+        <MobileBottomBar isPaused={isPaused} onPause={handlePause} onQuit={handleQuit} />
       </div>
 
       <QuizModal />
       <MessageOverlay />
 
-      {/* Pause Overlay */}
       {isPaused && (
         <motion.div
-          className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-emerald-950/76 p-4 backdrop-blur-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
           <motion.div
-            className="bg-gradient-to-br from-emerald-900 to-emerald-800 rounded-3xl p-10 text-center shadow-2xl max-w-sm mx-4 border-2 border-emerald-500/30"
-            initial={{ scale: 0.8 }}
+            className="surface-panel w-full max-w-sm rounded-[2rem] p-6 text-center"
+            initial={{ scale: 0.92 }}
             animate={{ scale: 1 }}
           >
-            <div className="text-7xl mb-5">⏸️</div>
-            <h2 className="text-3xl font-bold text-white mb-3">JOGO PAUSADO</h2>
-            <p className="text-emerald-200 mb-8">Clique para continuar jogando</p>
+            <div className="icon-badge mx-auto mb-4 h-16 w-16">
+              <Pause className="h-8 w-8" />
+            </div>
+            <h2 className="text-3xl font-black text-emerald-950">Jogo pausado</h2>
+            <p className="mt-2 font-semibold text-emerald-900/60">Continue quando estiver pronto.</p>
             <motion.button
               onClick={handlePause}
-              className="bg-gradient-to-r from-primary-500 to-primary-600 text-white font-bold py-4 px-12 rounded-2xl shadow-glow hover:shadow-glow-lg transition-all"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="mt-6 inline-flex min-h-[56px] w-full items-center justify-center gap-2 rounded-2xl font-black action-primary"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
-              ▶️ Continuar
+              <Play className="h-5 w-5" fill="currentColor" />
+              Continuar
             </motion.button>
           </motion.div>
         </motion.div>
       )}
-    </div>
+    </main>
   );
 };
+
+const MobileTopBar = ({ score, correctAnswers, wrongAnswers }) => (
+  <div className="fixed left-0 right-0 top-0 z-40 border-b border-white/10 bg-emerald-950/82 px-4 py-3 backdrop-blur-xl lg:hidden">
+    <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
+      <div>
+        <div className="text-xs font-bold uppercase text-primary-200/70">Pontos</div>
+        <div className="text-2xl font-black text-white">{score}</div>
+      </div>
+      <div className="flex items-center gap-3 text-sm font-black text-white">
+        <span className="inline-flex items-center gap-1"><CheckCircle className="h-4 w-4 text-primary-300" />{correctAnswers}</span>
+        <span className="inline-flex items-center gap-1"><XCircle className="h-4 w-4 text-red-300" />{wrongAnswers}</span>
+      </div>
+    </div>
+  </div>
+);
+
+const ScorePanel = ({ score, correctAnswers, wrongAnswers, accuracy }) => (
+  <motion.section
+    className="surface-panel-dark rounded-[1.5rem] p-4"
+    initial={{ x: -18, opacity: 0 }}
+    animate={{ x: 0, opacity: 1 }}
+  >
+    <div className="mb-5 flex items-center gap-3">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-400/15 text-primary-300">
+        <Trophy className="h-6 w-6" />
+      </div>
+      <div>
+        <div className="text-xs font-black uppercase text-white/45">Pontuacao</div>
+        <div className="text-3xl font-black text-white">{score}</div>
+      </div>
+    </div>
+
+    <div className="grid gap-2">
+      <MiniMetric icon={CheckCircle} label="Acertos" value={correctAnswers} tone="text-primary-300" />
+      <MiniMetric icon={XCircle} label="Erros" value={wrongAnswers} tone="text-red-300" />
+      <MiniMetric icon={TrendingUp} label="Precisao" value={`${accuracy}%`} tone="text-secondary-300" />
+    </div>
+  </motion.section>
+);
+
+const ControlPanel = ({ isPaused, onPause, onQuit }) => (
+  <motion.section
+    className="surface-panel-dark rounded-[1.5rem] p-4"
+    initial={{ x: -18, opacity: 0 }}
+    animate={{ x: 0, opacity: 1 }}
+    transition={{ delay: 0.08 }}
+  >
+    <div className="grid gap-3">
+      <motion.button
+        onClick={onPause}
+        className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl font-black action-primary"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        {isPaused ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />}
+        {isPaused ? 'Continuar' : 'Pausar'}
+      </motion.button>
+      <motion.button
+        onClick={onQuit}
+        className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-white/10 font-black text-white transition hover:bg-white/15"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <Home className="h-5 w-5" />
+        Sair
+      </motion.button>
+    </div>
+  </motion.section>
+);
+
+const PlayersPanel = ({ players, currentPlayerIndex }) => (
+  <motion.section
+    className="surface-panel-dark rounded-[1.5rem] p-4"
+    initial={{ x: 18, opacity: 0 }}
+    animate={{ x: 0, opacity: 1 }}
+  >
+    <div className="mb-4 flex items-center gap-2">
+      <Users className="h-5 w-5 text-primary-300" />
+      <div className="text-sm font-black uppercase text-white">Jogadores</div>
+    </div>
+
+    <div className="grid gap-2">
+      {players.map((player, index) => {
+        const finishedCount = player.pawns?.filter((p) => p.finished).length || 0;
+        const inPlayCount = player.pawns?.filter((p) => p.location !== 'base' && !p.finished).length || 0;
+        const isCurrentPlayer = index === currentPlayerIndex;
+
+        return (
+          <motion.div
+            key={player.id}
+            className={`flex items-center gap-3 rounded-2xl p-3 transition ${
+              isCurrentPlayer ? 'bg-primary-400/16 ring-2 ring-primary-300/70' : 'bg-white/8 ring-1 ring-white/8'
+            }`}
+            initial={{ x: 18, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: index * 0.05 }}
+          >
+            <div
+              className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl text-base font-black text-white shadow-lg"
+              style={{ backgroundColor: player.color }}
+            >
+              {player.name.charAt(0)}
+              {isCurrentPlayer && <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-emerald-950 bg-primary-300" />}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-sm font-black text-white">{player.name}</div>
+              <div className="mt-1 flex gap-2 text-xs font-bold text-white/50">
+                <span>Base {4 - inPlayCount - finishedCount}</span>
+                <span>Jogo {inPlayCount}</span>
+                <span>Fim {finishedCount}</span>
+              </div>
+            </div>
+            <div className="text-sm font-black text-primary-300">{player.score}</div>
+          </motion.div>
+        );
+      })}
+    </div>
+  </motion.section>
+);
+
+const DicePanel = () => (
+  <motion.section
+    className="surface-panel-dark rounded-[1.5rem] p-5 text-center"
+    initial={{ x: 18, opacity: 0 }}
+    animate={{ x: 0, opacity: 1 }}
+    transition={{ delay: 0.08 }}
+  >
+    <div className="mb-3 inline-flex items-center gap-2 text-sm font-black uppercase text-white/55">
+      <Activity className="h-4 w-4 text-primary-300" />
+      Lancar dado
+    </div>
+    <Dice />
+  </motion.section>
+);
+
+const MiniMetric = ({ icon: Icon, label, value, tone }) => (
+  <div className="flex items-center gap-2 rounded-2xl bg-white/8 px-3 py-2">
+    <Icon className={`h-4 w-4 ${tone}`} />
+    <span className="text-sm font-semibold text-white/60">{label}</span>
+    <strong className="ml-auto text-white">{value}</strong>
+  </div>
+);
+
+const MobileBottomBar = ({ isPaused, onPause, onQuit }) => (
+  <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-emerald-950/82 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-xl lg:hidden">
+    <div className="mx-auto flex max-w-3xl gap-3">
+      <button
+        onClick={onPause}
+        className="inline-flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-2xl font-black action-primary"
+      >
+        {isPaused ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />}
+        {isPaused ? 'Continuar' : 'Pausar'}
+      </button>
+      <button
+        onClick={onQuit}
+        className="inline-flex min-h-[52px] w-16 items-center justify-center rounded-2xl bg-white/10 text-white"
+        aria-label="Sair"
+      >
+        <Home className="h-5 w-5" />
+      </button>
+    </div>
+  </div>
+);
 
 export default Game;

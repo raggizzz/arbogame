@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Copy, Check, Play, ArrowLeft, Crown, Loader } from 'lucide-react';
+import { ArrowLeft, Check, Copy, Crown, Loader, Play, RefreshCw, Users } from 'lucide-react';
 import useGameStore from '../store/gameStore';
-import { 
-  createRoom, 
-  joinRoom, 
-  setPlayerReady, 
-  startGame, 
+import {
+  createRoom,
+  joinRoom,
+  setPlayerReady,
+  startGame,
   leaveRoom,
   subscribeToRoom,
   listAvailableRooms
@@ -14,7 +14,7 @@ import {
 
 const MultiplayerLobby = () => {
   const { user, playerName, setGameState, startOnlineGame } = useGameStore();
-  const [mode, setMode] = useState('menu'); // menu, create, join, lobby
+  const [mode, setMode] = useState('menu');
   const [roomCode, setRoomCode] = useState('');
   const [currentRoom, setCurrentRoom] = useState(null);
   const [availableRooms, setAvailableRooms] = useState([]);
@@ -24,6 +24,10 @@ const MultiplayerLobby = () => {
   const [unsubscribe, setUnsubscribe] = useState(null);
 
   useEffect(() => {
+    if (!user) setGameState('login');
+  }, [setGameState, user]);
+
+  useEffect(() => {
     if (mode === 'join') {
       loadAvailableRooms();
     }
@@ -31,108 +35,96 @@ const MultiplayerLobby = () => {
 
   useEffect(() => {
     return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
+      if (unsubscribe) unsubscribe();
     };
   }, [unsubscribe]);
 
+  const watchRoom = (roomId) => {
+    const unsub = subscribeToRoom(roomId, (updatedRoom) => {
+      if (updatedRoom) {
+        setCurrentRoom(updatedRoom);
+        if (updatedRoom.status === 'playing' && updatedRoom.gameState) {
+          startOnlineGame(updatedRoom, user.uid);
+        }
+      } else {
+        setMode('menu');
+        setCurrentRoom(null);
+      }
+    });
+    setUnsubscribe(() => unsub);
+  };
+
   const loadAvailableRooms = async () => {
     setLoading(true);
+    setError('');
     try {
       const rooms = await listAvailableRooms();
       setAvailableRooms(rooms);
     } catch (err) {
-      setError('Erro ao carregar salas');
+      setError('Erro ao carregar salas.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleCreateRoom = async () => {
+    if (!user) return;
     setLoading(true);
     setError('');
     try {
       const room = await createRoom(user.uid, playerName, 4);
       setCurrentRoom(room);
       setMode('lobby');
-      
-      // Observar mudanças na sala
-      const unsub = subscribeToRoom(room.roomId, (updatedRoom) => {
-        if (updatedRoom) {
-          setCurrentRoom(updatedRoom);
-          // Se o jogo iniciou, ir para tela de jogo
-          if (updatedRoom.status === 'playing' && updatedRoom.gameState) {
-            startOnlineGame(updatedRoom, user.uid);
-          }
-        } else {
-          // Sala foi deletada
-          setMode('menu');
-          setCurrentRoom(null);
-        }
-      });
-      setUnsubscribe(() => unsub);
+      watchRoom(room.roomId);
     } catch (err) {
-      setError('Erro ao criar sala: ' + err.message);
+      setError(`Erro ao criar sala: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
   const handleJoinRoom = async (code) => {
+    if (!user) return;
     setLoading(true);
     setError('');
     try {
       const room = await joinRoom(code, user.uid, playerName);
       setCurrentRoom(room);
       setMode('lobby');
-      
-      // Observar mudanças na sala
-      const unsub = subscribeToRoom(room.roomId, (updatedRoom) => {
-        if (updatedRoom) {
-          setCurrentRoom(updatedRoom);
-          if (updatedRoom.status === 'playing' && updatedRoom.gameState) {
-            startOnlineGame(updatedRoom, user.uid);
-          }
-        } else {
-          setMode('menu');
-          setCurrentRoom(null);
-        }
-      });
-      setUnsubscribe(() => unsub);
+      watchRoom(room.roomId);
     } catch (err) {
-      setError('Erro ao entrar na sala: ' + err.message);
+      setError(`Erro ao entrar na sala: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
   const handleToggleReady = async () => {
-    if (!currentRoom) return;
-    const player = currentRoom.players.find(p => p.id === user.uid);
+    if (!currentRoom || !user) return;
+    const player = currentRoom.players.find((p) => p.id === user.uid);
     if (!player) return;
-    
+
     try {
       await setPlayerReady(currentRoom.roomId, user.uid, !player.isReady);
     } catch (err) {
-      setError('Erro ao marcar pronto');
+      setError('Erro ao marcar pronto.');
     }
   };
 
   const handleStartGame = async () => {
-    if (!currentRoom) return;
+    if (!currentRoom || !user) return;
     setLoading(true);
     try {
       await startGame(currentRoom.roomId, user.uid);
     } catch (err) {
-      setError('Erro ao iniciar: ' + err.message);
+      setError(`Erro ao iniciar: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
   const handleLeaveRoom = async () => {
-    if (!currentRoom) return;
+    if (!currentRoom || !user) return;
     try {
       await leaveRoom(currentRoom.roomId, user.uid);
       if (unsubscribe) {
@@ -142,363 +134,271 @@ const MultiplayerLobby = () => {
       setCurrentRoom(null);
       setMode('menu');
     } catch (err) {
-      setError('Erro ao sair da sala');
+      setError('Erro ao sair da sala.');
     }
   };
 
   const copyRoomCode = () => {
-    if (currentRoom) {
-      navigator.clipboard.writeText(currentRoom.roomCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
+    if (!currentRoom) return;
+    navigator.clipboard.writeText(currentRoom.roomCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  const isHost = currentRoom && currentRoom.hostId === user.uid;
-  const allReady = currentRoom && currentRoom.players.every(p => p.isReady);
+  const isHost = currentRoom && user && currentRoom.hostId === user.uid;
+  const allReady = currentRoom && currentRoom.players.every((p) => p.isReady);
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden overflow-y-auto">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900">
-        <div className="absolute inset-0 bg-mesh-gradient opacity-20" />
-      </div>
-
-      <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-8 sm:p-8">
-        <div className="max-w-4xl w-full">
+    <main className="screen-shell-dark">
+      <div className="page-container flex min-h-screen items-center py-6 sm:py-10">
+        <div className="w-full">
           <AnimatePresence mode="wait">
-            {/* Menu Principal */}
             {mode === 'menu' && (
-              <motion.div
+              <LobbyFrame
                 key="menu"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="space-y-6"
+                back={() => setGameState('login')}
+                title="Multiplayer online"
+                subtitle="Crie uma sala ou entre com o codigo de um amigo."
               >
-                <button
-                  onClick={() => setGameState('login')}
-                  className="fixed sm:absolute top-4 left-4 sm:top-8 sm:left-8 p-3 glass-dark rounded-2xl hover:bg-white/10 transition-colors z-20"
-                  aria-label="Voltar"
-                >
-                  <ArrowLeft className="w-6 h-6 text-white" />
-                </button>
-
-                <div className="text-center mb-8 sm:mb-12 pt-12 sm:pt-0">
-                  <h1 className="text-4xl sm:text-6xl font-display font-black gradient-text mb-3 sm:mb-4 break-words">
-                    MULTIPLAYER
-                  </h1>
-                  <p className="text-white/70 text-base sm:text-xl">
-                    Jogue com seus amigos online
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <motion.button
+                <div className="grid gap-4 md:grid-cols-2">
+                  <ChoiceCard
+                    icon={Users}
+                    title="Criar sala"
+                    text="Gere um codigo e espere os jogadores ficarem prontos."
                     onClick={handleCreateRoom}
-                    className="glass-dark rounded-3xl p-6 sm:p-8 hover:bg-white/10 transition-all"
-                    whileHover={{ scale: 1.02, y: -5 }}
-                    whileTap={{ scale: 0.98 }}
                     disabled={loading}
-                  >
-                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center mx-auto mb-4 shadow-glow">
-                      <Users className="w-10 h-10 text-white" />
-                    </div>
-                    <h2 className="text-2xl sm:text-3xl font-display font-bold text-white mb-2">
-                      CRIAR SALA
-                    </h2>
-                    <p className="text-white/70">
-                      Crie uma nova sala e convide amigos
-                    </p>
-                  </motion.button>
-
-                  <motion.button
+                  />
+                  <ChoiceCard
+                    icon={Play}
+                    title="Entrar em sala"
+                    text="Use um codigo ou escolha uma sala disponivel."
                     onClick={() => setMode('join')}
-                    className="glass-dark rounded-3xl p-6 sm:p-8 hover:bg-white/10 transition-all"
-                    whileHover={{ scale: 1.02, y: -5 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-secondary-500 to-secondary-600 flex items-center justify-center mx-auto mb-4 shadow-glow-blue">
-                      <Play className="w-10 h-10 text-white" />
-                    </div>
-                    <h2 className="text-2xl sm:text-3xl font-display font-bold text-white mb-2">
-                      ENTRAR
-                    </h2>
-                    <p className="text-white/70">
-                      Entre em uma sala existente
-                    </p>
-                  </motion.button>
+                  />
                 </div>
-
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="bg-danger-500/20 border-2 border-danger-500 rounded-2xl p-4 text-white text-center"
-                  >
-                    {error}
-                  </motion.div>
-                )}
-              </motion.div>
+                <ErrorBox error={error} />
+              </LobbyFrame>
             )}
 
-            {/* Entrar na Sala */}
             {mode === 'join' && (
-              <motion.div
+              <LobbyFrame
                 key="join"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="space-y-6"
+                back={() => setMode('menu')}
+                title="Entrar em sala"
+                subtitle="Digite o codigo de seis caracteres ou escolha uma sala aberta."
               >
-                <button
-                  onClick={() => setMode('menu')}
-                  className="fixed sm:absolute top-4 left-4 sm:top-8 sm:left-8 p-3 glass-dark rounded-2xl hover:bg-white/10 transition-colors z-20"
-                  aria-label="Voltar"
-                >
-                  <ArrowLeft className="w-6 h-6 text-white" />
-                </button>
-
-                <div className="text-center mb-8 pt-12 sm:pt-0">
-                  <h1 className="text-3xl sm:text-5xl font-display font-black text-white mb-4">
-                    ENTRAR NA SALA
-                  </h1>
-                </div>
-
-                <div className="glass-dark rounded-3xl p-5 sm:p-8">
-                  <label className="block text-white font-semibold mb-3">
-                    Código da Sala
-                  </label>
-                  <div className="flex flex-col sm:flex-row gap-3">
+                <section className="surface-panel-dark rounded-[2rem] p-5 sm:p-6">
+                  <label className="mb-2 block text-sm font-black uppercase text-white/60">Codigo da sala</label>
+                  <div className="flex flex-col gap-3 sm:flex-row">
                     <input
                       type="text"
                       value={roomCode}
                       onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                      placeholder="Digite o código..."
-                      className="min-w-0 flex-1 bg-dark-700 text-white px-4 sm:px-6 py-4 rounded-2xl border-2 border-dark-600 focus:border-primary-500 outline-none text-xl sm:text-2xl font-mono text-center tracking-widest"
+                      placeholder="ABC123"
+                      className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-white/10 px-5 py-4 text-center font-mono text-2xl font-black tracking-[0.24em] text-white outline-none transition placeholder:text-white/25 focus:border-primary-400 focus:ring-4 focus:ring-primary-400/15"
                       maxLength={6}
                     />
                     <motion.button
                       onClick={() => handleJoinRoom(roomCode)}
                       disabled={loading || roomCode.length !== 6}
-                      className="bg-gradient-to-r from-primary-500 to-primary-600 text-white font-bold px-8 py-4 rounded-2xl shadow-glow disabled:opacity-50 disabled:cursor-not-allowed"
-                      whileHover={{ scale: loading ? 1 : 1.05 }}
-                      whileTap={{ scale: loading ? 1 : 0.95 }}
+                      className="inline-flex min-h-[58px] items-center justify-center rounded-2xl px-7 font-black action-primary disabled:cursor-not-allowed disabled:opacity-50"
+                      whileHover={{ scale: loading ? 1 : 1.02 }}
+                      whileTap={{ scale: loading ? 1 : 0.98 }}
                     >
-                      {loading ? <Loader className="w-6 h-6 animate-spin" /> : 'ENTRAR'}
+                      {loading ? <Loader className="h-5 w-5 animate-spin" /> : 'Entrar'}
                     </motion.button>
                   </div>
-                </div>
+                </section>
 
-                {/* Salas Disponíveis */}
-                <div className="glass-dark rounded-3xl p-5 sm:p-8">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-                    <h2 className="text-xl sm:text-2xl font-display font-bold text-white">
-                      Salas Disponíveis
-                    </h2>
+                <section className="surface-panel-dark rounded-[2rem] p-5 sm:p-6">
+                  <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <h2 className="text-xl font-black text-white">Salas disponiveis</h2>
                     <button
                       onClick={loadAvailableRooms}
-                      className="text-primary-400 hover:text-primary-300 transition-colors"
+                      className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 text-sm font-bold text-white transition hover:bg-white/15"
                     >
-                      🔄 Atualizar
+                      <RefreshCw className="h-4 w-4" />
+                      Atualizar
                     </button>
                   </div>
 
                   {loading ? (
-                    <div className="text-center py-8">
-                      <Loader className="w-8 h-8 animate-spin text-primary-500 mx-auto" />
+                    <div className="py-8 text-center">
+                      <Loader className="mx-auto h-8 w-8 animate-spin text-primary-400" />
                     </div>
                   ) : availableRooms.length === 0 ? (
-                    <div className="text-center py-8 text-white/50">
-                      Nenhuma sala disponível
+                    <div className="rounded-2xl border border-dashed border-white/14 py-10 text-center font-semibold text-white/50">
+                      Nenhuma sala aberta agora.
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="grid gap-3">
                       {availableRooms.map((room) => (
                         <motion.button
                           key={room.roomId}
                           onClick={() => handleJoinRoom(room.roomCode)}
-                          className="w-full bg-dark-700 hover:bg-dark-600 rounded-2xl p-4 flex items-center justify-between transition-colors"
-                          whileHover={{ x: 5 }}
+                          className="flex items-center justify-between gap-4 rounded-2xl bg-white/10 p-4 text-left transition hover:bg-white/15"
+                          whileHover={{ x: 4 }}
                         >
-                          <div className="text-left">
-                            <div className="text-white font-bold text-lg">
-                              {room.hostName}'s Room
-                            </div>
-                            <div className="text-white/50 text-sm">
-                              Código: {room.roomCode}
-                            </div>
-                          </div>
-                          <div className="text-white/70">
-                            {room.currentPlayers}/{room.maxPlayers} jogadores
-                          </div>
+                          <span>
+                            <span className="block font-black text-white">{room.hostName || 'Sala'} </span>
+                            <span className="text-sm font-semibold text-white/50">Codigo: {room.roomCode}</span>
+                          </span>
+                          <span className="rounded-xl bg-white/10 px-3 py-2 text-sm font-black text-white">
+                            {room.currentPlayers}/{room.maxPlayers}
+                          </span>
                         </motion.button>
                       ))}
                     </div>
                   )}
-                </div>
-
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="bg-danger-500/20 border-2 border-danger-500 rounded-2xl p-4 text-white text-center"
-                  >
-                    {error}
-                  </motion.div>
-                )}
-              </motion.div>
+                </section>
+                <ErrorBox error={error} />
+              </LobbyFrame>
             )}
 
-            {/* Lobby da Sala */}
             {mode === 'lobby' && currentRoom && (
-              <motion.div
+              <LobbyFrame
                 key="lobby"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="space-y-6"
+                back={handleLeaveRoom}
+                title={`Sala ${currentRoom.roomCode}`}
+                subtitle="Compartilhe o codigo e aguarde todos ficarem prontos."
               >
                 <button
-                  onClick={handleLeaveRoom}
-                  className="fixed sm:absolute top-4 left-4 sm:top-8 sm:left-8 p-3 glass-dark rounded-2xl hover:bg-white/10 transition-colors z-20"
-                  aria-label="Sair da sala"
+                  onClick={copyRoomCode}
+                  className="mx-auto flex items-center gap-2 rounded-2xl bg-white/10 px-5 py-3 font-bold text-white transition hover:bg-white/15"
                 >
-                  <ArrowLeft className="w-6 h-6 text-white" />
+                  {copied ? <Check className="h-5 w-5 text-primary-300" /> : <Copy className="h-5 w-5" />}
+                  {copied ? 'Codigo copiado' : 'Copiar codigo'}
                 </button>
 
-                <div className="text-center mb-8 pt-12 sm:pt-0">
-                  <h1 className="text-3xl sm:text-5xl font-display font-black text-white mb-4 break-words">
-                    SALA: {currentRoom.roomCode}
-                  </h1>
-                  <button
-                    onClick={copyRoomCode}
-                    className="inline-flex items-center gap-2 text-primary-400 hover:text-primary-300 transition-colors"
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="w-5 h-5" />
-                        Copiado!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-5 h-5" />
-                        Copiar código
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                {/* Jogadores */}
-                <div className="glass-dark rounded-3xl p-5 sm:p-8">
-                  <h2 className="text-xl sm:text-2xl font-display font-bold text-white mb-6">
+                <section className="surface-panel-dark rounded-[2rem] p-5 sm:p-6">
+                  <h2 className="mb-5 text-xl font-black text-white">
                     Jogadores ({currentRoom.currentPlayers}/{currentRoom.maxPlayers})
                   </h2>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid gap-3 md:grid-cols-2">
                     {currentRoom.players.map((player, index) => (
                       <motion.div
                         key={player.id}
-                        className="bg-dark-700 rounded-2xl p-4 sm:p-6 relative"
-                        initial={{ opacity: 0, scale: 0.9 }}
+                        className="relative rounded-2xl bg-white/10 p-4"
+                        initial={{ opacity: 0, scale: 0.96 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.1 }}
+                        transition={{ delay: index * 0.06 }}
                       >
-                        {player.isHost && (
-                          <div className="absolute top-3 right-3">
-                            <Crown className="w-6 h-6 text-accent-400" />
-                          </div>
-                        )}
-
-                        <div className="flex items-center gap-4">
+                        {player.isHost && <Crown className="absolute right-4 top-4 h-5 w-5 text-accent-300" />}
+                        <div className="flex items-center gap-4 pr-8">
                           <div
-                            className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-xl sm:text-2xl font-bold text-white shadow-lg"
+                            className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl text-xl font-black text-white shadow-lg"
                             style={{ backgroundColor: player.color }}
                           >
                             {player.name.charAt(0)}
                           </div>
-
-                          <div className="flex-1">
-                            <div className="text-white font-bold text-lg">
-                              {player.name}
-                            </div>
-                            <div className={`text-sm font-semibold ${player.isReady ? 'text-primary-400' : 'text-white/50'}`}>
-                              {player.isReady ? '✓ Pronto' : 'Aguardando...'}
+                          <div className="min-w-0">
+                            <div className="truncate font-black text-white">{player.name}</div>
+                            <div className={`mt-1 text-sm font-bold ${player.isReady ? 'text-primary-300' : 'text-white/45'}`}>
+                              {player.isReady ? 'Pronto' : 'Aguardando'}
                             </div>
                           </div>
                         </div>
                       </motion.div>
                     ))}
 
-                    {/* Slots vazios */}
                     {Array.from({ length: currentRoom.maxPlayers - currentRoom.currentPlayers }).map((_, i) => (
-                      <div
-                        key={`empty-${i}`}
-                        className="bg-dark-700/50 rounded-2xl p-6 border-2 border-dashed border-dark-600 flex items-center justify-center"
-                      >
-                        <div className="text-white/30 text-center">
-                          <Users className="w-8 h-8 mx-auto mb-2" />
-                          <div className="text-sm">Aguardando jogador...</div>
-                        </div>
+                      <div key={`empty-${i}`} className="rounded-2xl border border-dashed border-white/14 p-4 text-center text-white/35">
+                        <Users className="mx-auto mb-2 h-7 w-7" />
+                        <div className="text-sm font-bold">Aguardando jogador</div>
                       </div>
                     ))}
                   </div>
-                </div>
+                </section>
 
-                {/* Botões de Ação */}
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="grid gap-3 sm:grid-cols-2">
                   <motion.button
                     onClick={handleToggleReady}
                     disabled={isHost}
-                    className={`flex-1 font-bold py-4 rounded-2xl transition-all ${
-                      currentRoom.players.find(p => p.id === user.uid)?.isReady
-                        ? 'bg-dark-700 text-white/50'
-                        : 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-glow'
-                    } ${isHost ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`min-h-[58px] rounded-2xl px-5 font-black transition ${
+                      currentRoom.players.find((p) => p.id === user?.uid)?.isReady
+                        ? 'bg-white/10 text-white/55'
+                        : 'action-primary'
+                    } ${isHost ? 'cursor-not-allowed opacity-50' : ''}`}
                     whileHover={!isHost ? { scale: 1.02 } : {}}
                     whileTap={!isHost ? { scale: 0.98 } : {}}
                   >
-                    {currentRoom.players.find(p => p.id === user.uid)?.isReady ? 'PRONTO ✓' : 'MARCAR COMO PRONTO'}
+                    {currentRoom.players.find((p) => p.id === user?.uid)?.isReady ? 'Pronto' : 'Marcar como pronto'}
                   </motion.button>
 
                   {isHost && (
                     <motion.button
                       onClick={handleStartGame}
                       disabled={!allReady || loading}
-                      className="flex-1 bg-gradient-to-r from-accent-500 to-accent-600 text-white font-bold py-4 rounded-2xl shadow-glow-yellow disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="min-h-[58px] rounded-2xl bg-accent-500 px-5 font-black text-white shadow-lg transition hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
                       whileHover={allReady && !loading ? { scale: 1.02 } : {}}
                       whileTap={allReady && !loading ? { scale: 0.98 } : {}}
                     >
-                      {loading ? (
-                        <Loader className="w-6 h-6 animate-spin mx-auto" />
-                      ) : (
-                        'INICIAR JOGO'
-                      )}
+                      {loading ? <Loader className="mx-auto h-5 w-5 animate-spin" /> : 'Iniciar jogo'}
                     </motion.button>
                   )}
                 </div>
 
                 {!allReady && isHost && (
-                  <div className="text-center text-white/50 text-sm">
-                    Aguardando todos os jogadores ficarem prontos...
-                  </div>
+                  <p className="text-center text-sm font-semibold text-white/45">Aguardando todos os jogadores ficarem prontos.</p>
                 )}
-
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="bg-danger-500/20 border-2 border-danger-500 rounded-2xl p-4 text-white text-center"
-                  >
-                    {error}
-                  </motion.div>
-                )}
-              </motion.div>
+                <ErrorBox error={error} />
+              </LobbyFrame>
             )}
           </AnimatePresence>
         </div>
       </div>
+    </main>
+  );
+};
+
+const LobbyFrame = ({ back, title, subtitle, children }) => (
+  <motion.div
+    className="mx-auto max-w-4xl space-y-5"
+    initial={{ opacity: 0, y: 18 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -18 }}
+  >
+    <button
+      onClick={back}
+      className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-white transition hover:bg-white/15"
+      aria-label="Voltar"
+    >
+      <ArrowLeft className="h-5 w-5" />
+    </button>
+    <div className="text-center">
+      <h1 className="brand-title-dark text-4xl font-black leading-tight sm:text-6xl">{title}</h1>
+      <p className="brand-copy-dark mx-auto mt-3 max-w-xl text-base font-medium sm:text-lg">{subtitle}</p>
     </div>
+    {children}
+  </motion.div>
+);
+
+const ChoiceCard = ({ icon: Icon, title, text, onClick, disabled }) => (
+  <motion.button
+    onClick={onClick}
+    disabled={disabled}
+    className="surface-panel-dark min-h-[190px] rounded-[2rem] p-6 text-left transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+    whileHover={{ y: -4 }}
+    whileTap={{ scale: 0.98 }}
+  >
+    <span className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-400/15 text-primary-300">
+      <Icon className="h-8 w-8" />
+    </span>
+    <span className="block text-2xl font-black text-white">{title}</span>
+    <span className="mt-2 block text-sm font-semibold leading-6 text-white/58">{text}</span>
+  </motion.button>
+);
+
+const ErrorBox = ({ error }) => {
+  if (!error) return null;
+
+  return (
+    <motion.div
+      className="rounded-2xl border border-red-300/40 bg-red-500/15 p-4 text-center font-bold text-red-100"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      {error}
+    </motion.div>
   );
 };
 

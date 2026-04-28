@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { HelpCircle, Lightbulb } from 'lucide-react';
 import useGameStore from '../store/gameStore';
 
 const QuizModal = () => {
@@ -13,89 +14,69 @@ const QuizModal = () => {
   } = useGameStore();
   const currentPlayer = players[currentPlayerIndex];
   const canAnswer = !isOnlineMultiplayer || currentPlayer?.id === localPlayerId;
-  
+
   if (!showQuiz || !currentQuestion) return null;
-  
+
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-emerald-950/72 p-4 backdrop-blur-md"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
         <motion.div
-          className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 relative overflow-hidden"
-          initial={{ scale: 0.8, y: 50 }}
+          className="surface-panel relative w-full max-w-2xl overflow-hidden rounded-[2rem] p-5 sm:p-8"
+          initial={{ scale: 0.92, y: 28 }}
           animate={{ scale: 1, y: 0 }}
-          exit={{ scale: 0.8, y: 50 }}
+          exit={{ scale: 0.92, y: 28 }}
         >
-          {/* Decoração de fundo */}
-          <div className="absolute top-0 right-0 text-9xl opacity-5 pointer-events-none">
-            🦟
-          </div>
-          
-          {/* Cabeçalho */}
-          <div className="text-center mb-6">
-            <motion.div
-              className="inline-block text-6xl mb-4"
-              animate={{
-                rotate: [0, -10, 10, -10, 0],
-                scale: [1, 1.1, 1]
-              }}
-              transition={{
-                duration: 0.5,
-                repeat: Infinity,
-                repeatDelay: 2
-              }}
-            >
-              ❓
-            </motion.div>
-            <h2 className="text-3xl font-bold text-dengue-blue mb-2">
-              Hora do Quiz!
-            </h2>
-            <p className="text-gray-600">
-              Responda corretamente e ganhe +10 pontos! 🎯
-            </p>
-          </div>
-          
-          {/* Pergunta */}
-          <div className="bg-gradient-to-r from-dengue-blue to-blue-400 text-white rounded-2xl p-6 mb-6 shadow-lg">
-            <p className="text-xl font-semibold text-center leading-relaxed">
-              {currentQuestion.pergunta}
-            </p>
-          </div>
-          
-          {/* Alternativas */}
-          <div className="grid grid-cols-1 gap-3 mb-6">
-            {currentQuestion.alternativas.map((alternativa, index) => (
-              <motion.button
-                key={index}
-                className={`bg-white border-3 border-gray-300 rounded-xl p-4 text-left transition-all shadow-md group ${
-                  canAnswer
-                    ? 'hover:border-dengue-green hover:bg-dengue-green hover:bg-opacity-10 hover:shadow-lg'
-                    : 'opacity-60 cursor-not-allowed'
-                }`}
-                onClick={() => canAnswer && answerQuiz(index)}
-                disabled={!canAnswer}
-                whileHover={canAnswer ? { scale: 1.02, x: 5 } : {}}
-                whileTap={canAnswer ? { scale: 0.98 } : {}}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-dengue-blue to-blue-400 text-white flex items-center justify-center font-bold text-lg group-hover:from-dengue-green group-hover:to-green-500 transition-all">
+          <div className="absolute -right-10 -top-12 h-36 w-36 rounded-full bg-primary-300/30 blur-3xl" />
+          <div className="absolute -bottom-14 -left-12 h-40 w-40 rounded-full bg-secondary-300/25 blur-3xl" />
+
+          <div className="relative">
+            <div className="mb-5 flex items-start gap-4">
+              <div className="icon-badge h-14 w-14 flex-shrink-0">
+                <HelpCircle className="h-8 w-8" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-black text-emerald-950 sm:text-3xl">Hora do quiz</h2>
+                <p className="mt-1 text-sm font-semibold text-emerald-900/58">
+                  Responda corretamente para ganhar 10 pontos.
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-5 rounded-[1.5rem] bg-emerald-950 p-5 text-white shadow-lg">
+              <p className="text-lg font-bold leading-7 sm:text-xl">{currentQuestion.pergunta}</p>
+            </div>
+
+            <div className="grid gap-3">
+              {currentQuestion.alternativas.map((alternativa, index) => (
+                <motion.button
+                  key={index}
+                  className={`group flex items-center gap-4 rounded-2xl border p-4 text-left transition ${
+                    canAnswer
+                      ? 'border-emerald-900/12 bg-white hover:border-primary-500/50 hover:bg-primary-50'
+                      : 'cursor-not-allowed border-emerald-900/8 bg-white/55 opacity-65'
+                  }`}
+                  onClick={() => canAnswer && answerQuiz(index)}
+                  disabled={!canAnswer}
+                  whileHover={canAnswer ? { scale: 1.01, x: 3 } : {}}
+                  whileTap={canAnswer ? { scale: 0.99 } : {}}
+                >
+                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-950 text-base font-black text-white transition group-hover:bg-primary-600">
                     {String.fromCharCode(65 + index)}
-                  </div>
-                  <span className="text-lg font-medium text-gray-800 flex-1">
-                    {alternativa}
                   </span>
-                </div>
-              </motion.button>
-            ))}
-          </div>
-          
-          {/* Rodapé */}
-          <div className="text-center text-sm text-gray-500">
-            {canAnswer ? '💡 Pense bem antes de responder!' : 'Aguardando resposta do jogador da vez...'}
+                  <span className="min-w-0 flex-1 text-base font-bold leading-6 text-emerald-950">{alternativa}</span>
+                </motion.button>
+              ))}
+            </div>
+
+            <div className="mt-5 flex items-center justify-center gap-2 text-center text-sm font-semibold text-emerald-900/56">
+              <Lightbulb className="h-4 w-4 text-accent-500" />
+              {canAnswer ? 'Pense bem antes de responder.' : 'Aguardando resposta do jogador da vez.'}
+            </div>
           </div>
         </motion.div>
       </motion.div>

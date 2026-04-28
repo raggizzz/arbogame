@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Medal, ArrowLeft, School, Globe } from 'lucide-react';
+import { ArrowLeft, Medal, RefreshCw, School, Trophy, Users } from 'lucide-react';
 import useGameStore from '../store/gameStore';
 import { getTopRanking, getSchoolRanking } from '../firebase/rankingService';
 
@@ -10,17 +10,17 @@ const Ranking = () => {
   const [schoolRanking, setSchoolRanking] = useState([]);
   const [activeTab, setActiveTab] = useState('global');
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     loadRankings();
   }, []);
-  
+
   const loadRankings = async () => {
     setLoading(true);
     try {
       const global = await getTopRanking(10);
       setGlobalRanking(global);
-      
+
       if (schoolId) {
         const school = await getSchoolRanking(schoolId, 10);
         setSchoolRanking(school);
@@ -31,182 +31,120 @@ const Ranking = () => {
       setLoading(false);
     }
   };
-  
-  const getMedalEmoji = (position) => {
-    switch (position) {
-      case 1: return '🥇';
-      case 2: return '🥈';
-      case 3: return '🥉';
-      default: return `${position}º`;
-    }
-  };
-  
-  const RankingList = ({ data, type }) => (
-    <div className="space-y-3">
-      {data.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
-          <Trophy className="w-16 h-16 mx-auto mb-4 opacity-30" />
-          <p>Nenhum jogador ainda!</p>
-          <p className="text-sm mt-2">Seja o primeiro a jogar! 🎮</p>
-        </div>
-      ) : (
-        data.map((player, index) => (
-          <motion.div
-            key={player.userId}
-            className={`flex items-center gap-4 p-4 rounded-2xl shadow-md transition-all ${
-              index < 3
-                ? 'bg-gradient-to-r from-yellow-100 to-yellow-50 border-2 border-yellow-400'
-                : 'bg-white border-2 border-gray-200'
-            }`}
-            initial={{ x: -50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: index * 0.05 }}
-            whileHover={{ scale: 1.02, x: 5 }}
-          >
-            {/* Posição */}
-            <div className="text-3xl font-bold min-w-[60px] text-center">
-              {getMedalEmoji(index + 1)}
-            </div>
-            
-            {/* Info do Jogador */}
-            <div className="flex-1">
-              <div className="font-bold text-lg text-gray-800">
-                {player.playerName || player.name || 'Jogador'}
-              </div>
-              {player.schoolId && (
-                <div className="text-xs text-gray-500 flex items-center gap-1">
-                  <School className="w-3 h-3" />
-                  {player.schoolId}
-                </div>
-              )}
-            </div>
-            
-            {/* Pontuação */}
-            <div className="text-right">
-              <div className="text-2xl font-bold text-dengue-blue">
-                {player.score}
-              </div>
-              <div className="text-xs text-gray-500">pontos</div>
-            </div>
-            
-            {/* Estatísticas */}
-            <div className="text-xs text-gray-500 text-right min-w-[80px]">
-              <div>✅ {player.correctAnswers || 0}</div>
-              <div>❌ {player.wrongAnswers || 0}</div>
-            </div>
-          </motion.div>
-        ))
-      )}
-    </div>
-  );
-  
+
+  const data = activeTab === 'global' ? globalRanking : schoolRanking;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dengue-yellow via-yellow-400 to-dengue-green p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Cabeçalho */}
-        <motion.div
-          className="text-center mb-8"
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+    <main className="screen-shell">
+      <div className="page-container py-6 sm:py-10">
+        <button
+          onClick={() => setGameState('menu')}
+          className="mb-6 inline-flex h-11 w-11 items-center justify-center rounded-2xl action-secondary"
+          aria-label="Voltar ao menu"
         >
-          <button
-            onClick={() => setGameState('menu')}
-            className="absolute top-4 left-4 p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-all"
-          >
-            <ArrowLeft className="w-6 h-6 text-gray-600" />
-          </button>
-          
-          <motion.div
-            className="text-8xl mb-4"
-            animate={{
-              rotate: [0, 10, -10, 0],
-              scale: [1, 1.1, 1]
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity
-            }}
-          >
-            🏆
-          </motion.div>
-          
-          <h1 className="text-6xl font-bold text-white drop-shadow-2xl mb-2">
-            RANKING
-          </h1>
-          <p className="text-xl text-white drop-shadow-lg">
-            Os melhores agentes da dengue!
-          </p>
-        </motion.div>
-        
-        {/* Tabs */}
-        <motion.div
-          className="flex gap-4 mb-6"
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+
+        <motion.header
+          className="mb-7 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end"
+          initial={{ opacity: 0, y: -16 }}
+          animate={{ opacity: 1, y: 0 }}
         >
+          <div>
+            <div className="icon-badge mb-4 h-14 w-14">
+              <Trophy className="h-8 w-8" />
+            </div>
+            <h1 className="brand-title text-4xl font-black leading-tight sm:text-6xl">Ranking</h1>
+            <p className="brand-copy mt-3 max-w-xl text-lg font-semibold">
+              Veja quem esta liderando a campanha de prevencao.
+            </p>
+          </div>
+
           <button
-            onClick={() => setActiveTab('global')}
-            className={`flex-1 py-4 rounded-2xl font-bold text-lg transition-all shadow-lg ${
-              activeTab === 'global'
-                ? 'bg-white text-dengue-blue'
-                : 'bg-white bg-opacity-50 text-white hover:bg-opacity-70'
-            }`}
+            onClick={loadRankings}
+            className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl px-5 font-black action-primary"
           >
-            <Globe className="w-6 h-6 inline mr-2" />
-            Global
+            <RefreshCw className="h-5 w-5" />
+            Atualizar
           </button>
-          
-          {schoolId && (
-            <button
-              onClick={() => setActiveTab('school')}
-              className={`flex-1 py-4 rounded-2xl font-bold text-lg transition-all shadow-lg ${
-                activeTab === 'school'
-                  ? 'bg-white text-dengue-blue'
-                  : 'bg-white bg-opacity-50 text-white hover:bg-opacity-70'
-              }`}
-            >
-              <School className="w-6 h-6 inline mr-2" />
-              Minha Escola
-            </button>
-          )}
-        </motion.div>
-        
-        {/* Lista de Ranking */}
-        <motion.div
-          className="bg-white bg-opacity-95 backdrop-blur-sm rounded-3xl p-6 shadow-2xl"
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+        </motion.header>
+
+        <div className="mb-5 grid gap-3 sm:grid-cols-2">
+          <TabButton active={activeTab === 'global'} icon={Users} label="Global" onClick={() => setActiveTab('global')} />
+          {schoolId && <TabButton active={activeTab === 'school'} icon={School} label="Minha escola" onClick={() => setActiveTab('school')} />}
+        </div>
+
+        <motion.section
+          className="surface-panel rounded-[2rem] p-4 sm:p-6"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
         >
           {loading ? (
-            <div className="text-center py-12">
-              <motion.div
-                className="text-6xl mb-4"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-              >
-                ⏳
-              </motion.div>
-              <p className="text-gray-600">Carregando ranking...</p>
+            <div className="py-16 text-center">
+              <RefreshCw className="mx-auto mb-4 h-10 w-10 animate-spin text-primary-600" />
+              <p className="font-bold text-emerald-900/60">Carregando ranking...</p>
+            </div>
+          ) : data.length === 0 ? (
+            <div className="py-16 text-center">
+              <Trophy className="mx-auto mb-4 h-14 w-14 text-emerald-900/20" />
+              <p className="text-lg font-black text-emerald-950">Nenhum jogador ainda</p>
+              <p className="mt-1 font-semibold text-emerald-900/55">Seja o primeiro a jogar.</p>
             </div>
           ) : (
-            <>
-              {activeTab === 'global' && <RankingList data={globalRanking} type="global" />}
-              {activeTab === 'school' && <RankingList data={schoolRanking} type="school" />}
-            </>
+            <div className="grid gap-3">
+              {data.map((player, index) => (
+                <RankingRow key={player.userId || `${player.playerName}-${index}`} player={player} index={index} />
+              ))}
+            </div>
           )}
-        </motion.div>
-        
-        {/* Botão Atualizar */}
-        <motion.button
-          onClick={loadRankings}
-          className="w-full mt-6 bg-white text-dengue-blue font-bold py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          🔄 Atualizar Ranking
-        </motion.button>
+        </motion.section>
       </div>
-    </div>
+    </main>
+  );
+};
+
+const TabButton = ({ active, icon: Icon, label, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`inline-flex min-h-[54px] items-center justify-center gap-2 rounded-2xl px-5 font-black transition ${
+      active ? 'action-primary' : 'action-secondary'
+    }`}
+  >
+    <Icon className="h-5 w-5" />
+    {label}
+  </button>
+);
+
+const RankingRow = ({ player, index }) => {
+  const topThree = index < 3;
+
+  return (
+    <motion.div
+      className={`grid grid-cols-[auto_1fr_auto] items-center gap-4 rounded-2xl p-4 ${
+        topThree ? 'bg-accent-50 ring-1 ring-accent-300' : 'bg-white/75 ring-1 ring-emerald-900/8'
+      }`}
+      initial={{ x: -20, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ delay: index * 0.04 }}
+    >
+      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl font-black ${topThree ? 'bg-accent-400 text-white' : 'bg-emerald-950 text-white'}`}>
+        {topThree ? <Medal className="h-6 w-6" /> : index + 1}
+      </div>
+
+      <div className="min-w-0">
+        <div className="truncate text-base font-black text-emerald-950">{player.playerName || player.name || 'Jogador'}</div>
+        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs font-bold text-emerald-900/52">
+          {player.schoolId && <span>{player.schoolId}</span>}
+          <span>{player.correctAnswers || 0} acertos</span>
+          <span>{player.wrongAnswers || 0} erros</span>
+        </div>
+      </div>
+
+      <div className="text-right">
+        <div className="text-2xl font-black text-secondary-700">{player.score}</div>
+        <div className="text-xs font-bold uppercase text-emerald-900/45">pontos</div>
+      </div>
+    </motion.div>
   );
 };
 

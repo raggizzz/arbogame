@@ -20,8 +20,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  background: linear-gradient(135deg, #00E65C 0%, #0BA5E9 50%, #0F172A 100%);
+  background: #eef8f1;
   background-attachment: fixed;
+  color: #123026;
 }
 
 /* Scrollbar Customizada - ArboGame Style */
@@ -131,6 +132,135 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+/* ArboGame visual system */
+.screen-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 197, 66, 0.34), transparent 26rem),
+    radial-gradient(circle at 88% 10%, rgba(29, 183, 137, 0.28), transparent 30rem),
+    linear-gradient(135deg, #f6fff8 0%, #e8f7ff 45%, #fff6dc 100%);
+}
+
+.screen-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(18, 48, 38, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(18, 48, 38, 0.055) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.72), transparent 82%);
+}
+
+.screen-shell-dark {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(245, 158, 11, 0.22), transparent 24rem),
+    radial-gradient(circle at 88% 8%, rgba(0, 230, 92, 0.20), transparent 28rem),
+    linear-gradient(135deg, #071713 0%, #123026 48%, #062a38 100%);
+}
+
+.screen-shell-dark::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.65), transparent 82%);
+}
+
+.page-container {
+  position: relative;
+  z-index: 1;
+  width: min(1120px, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+.surface-panel {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(18, 48, 38, 0.11);
+  box-shadow: 0 24px 70px rgba(22, 60, 47, 0.14);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.surface-panel-dark {
+  background: rgba(6, 25, 20, 0.76);
+  border: 1px solid rgba(198, 255, 221, 0.16);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.brand-title {
+  color: #10382b;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.brand-title-dark {
+  color: #f5fff8;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.brand-copy {
+  color: rgba(18, 48, 38, 0.72);
+  text-wrap: pretty;
+}
+
+.brand-copy-dark {
+  color: rgba(237, 255, 244, 0.76);
+  text-wrap: pretty;
+}
+
+.action-primary {
+  background: linear-gradient(135deg, #00a85a 0%, #00d47a 52%, #0ba5e9 100%);
+  color: white;
+  box-shadow: 0 18px 34px rgba(0, 168, 90, 0.26);
+}
+
+.action-primary:hover {
+  filter: brightness(1.03);
+  box-shadow: 0 22px 42px rgba(0, 168, 90, 0.34);
+}
+
+.action-secondary {
+  background: rgba(255, 255, 255, 0.82);
+  color: #123026;
+  border: 1px solid rgba(18, 48, 38, 0.14);
+  box-shadow: 0 12px 30px rgba(22, 60, 47, 0.10);
+}
+
+.action-secondary:hover {
+  background: #ffffff;
+  border-color: rgba(0, 168, 90, 0.36);
+}
+
+.icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, #e9fff0 0%, #dff5ff 100%);
+  color: #007f48;
+  border: 1px solid rgba(0, 168, 90, 0.14);
+}
+
+.mini-board {
+  background:
+    linear-gradient(90deg, rgba(0, 168, 90, 0.22) 0 20%, transparent 20% 40%, rgba(245, 158, 11, 0.22) 40% 60%, transparent 60% 80%, rgba(11, 165, 233, 0.22) 80%),
+    #ffffff;
 }
 
 /* Glassmorphism Effects */
